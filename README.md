@@ -1,8 +1,8 @@
-#GP Project
+# GP Project
 ---
-##Implementation of Treaps
+## Implementation of Treaps
 ---
-###Team Members:
+### Team Members:
 
 - Darshan D
 - Karan Kumar G
