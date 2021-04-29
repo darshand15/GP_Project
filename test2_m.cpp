@@ -120,6 +120,18 @@ class Treap_node_t
         }
     }
 
+    static Treap_node_t<key_t,priorities_t>* copy_treap(Treap_node_t<key_t,priorities_t>** lhs, Treap_node_t<key_t,priorities_t> *root)
+    {
+        if(root)
+        {
+            (*lhs) = new Treap_node_t<key_t, priorities_t>(*root);
+            (*lhs)->left_n = copy_treap(&((*lhs)->left_n), root->left_n);
+            (*lhs)->right_n = copy_treap(&((*lhs)->right_n), root->right_n);
+        }
+        return *lhs;
+    }
+
+
     Treap_node_t* right_rotate(Treap_node_t* node)
     {
         Treap_node_t* left_subtree = node -> left_n;
@@ -179,22 +191,14 @@ class Treap_t
 
     Treap_t(const Treap_t &rhs)
     {
-        copy_treap(&(this->root), rhs.root);
+        Treap_node_t<key_t,priorities_t>::copy_treap(&(this->root), rhs.root);
     }
 
-    Treap_node_t<key_t,priorities_t>* copy_treap(Treap_node_t<key_t,priorities_t>** lhs, Treap_node_t<key_t,priorities_t> *root)
-    {
-        if(root)
-        {
-            *lhs = new Treap_node_t<key_t, priorities_t>(*root);
-            *lhs->left_n = copy_treap(*lhs->left_n, root->left_n);
-            *lhs->right_n = copy_treap(*lhs->right_n, root->right_n);
-        }
-    }
+
 
     Treap_t& operator=(const Treap_t &rhs)
     {
-        copy_treap(&(this->root), rhs.root);
+        Treap_node_t<key_t,priorities_t>::copy_treap(&(this->root), rhs.root);
         return *this;
     }
 
@@ -240,9 +244,15 @@ int main()
     t1.insert(20,2);
     t1.insert(40,4);
     t1.insert(80,20);
+    Treap_t<int,int> t2(t1);
+    t2.insert(100,34);
+    t1.insert(90,32);
 
+    cout<<"t1\n";
     cout<<t1;
-
+    cout<<"\n\n\n";
+    cout<<"t2\n";
+    cout<<t2;
     cout<<"\n\n\n";
     t1.preorder();
 }
