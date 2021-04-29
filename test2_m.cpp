@@ -107,6 +107,7 @@ class Treap_node_t
         }
     }
 
+
     //function to perform preorder traversal of the treap
     void preorder_traversal(Treap_node_t<key_t, priorities_t> *root) const
     {
@@ -239,6 +240,11 @@ class Treap_node_t
         return root;
     }
 
+    key_t operator*()
+    {
+        return this->node_val.first;
+    }
+
 
 };
 
@@ -319,6 +325,84 @@ class Treap_t
         this->root = this->root->delete_node(this->root,key);
     }
 
+
+    class Iterator
+    {
+    private:
+        Treap_node_t<key_t,priorities_t> *ptr_it;
+        // Treap_node_t<key_t,priorities_t> *ptr_parent;
+
+    public:
+        Iterator(Treap_node_t<key_t,priorities_t> *ptr_it) : ptr_it(ptr_it) {}
+        ~Iterator()
+        {
+
+        }
+
+        // Add bidirectional support
+
+        Iterator& operator++()
+        {
+            if( this->ptr_it->right_n != nullptr )
+            {
+                this->ptr_it = this->ptr_it->right_n;
+
+                while( this->ptr_it->left_n != nullptr )
+                {
+                    this->ptr_it = this->ptr_it->left_n;
+                }
+                
+            }
+            else
+            {
+                
+            }
+            return *this;
+            // return Iterator(this->ptr_it->inorder_successor());
+
+        }
+
+        Iterator operator++(int)
+        {
+            Iterator temp(*this);
+            ++*this;
+            return temp;
+        }
+
+        // Change to lvalue usage
+        key_t operator*()
+        {
+            return **(this->ptr_it);
+        }
+
+        bool operator==(const Iterator& rhs) const
+        {
+            return this->ptr_it->node_val.first == rhs.ptr_it->node_val.first;
+        }
+
+        bool operator!=(const Iterator& rhs) const
+        {
+            return !(*this == rhs);
+        }
+    };
+
+    Iterator begin()
+    {
+        return Iterator(this->root);
+    }
+
+    Iterator end()
+    {
+        Iterator temp(this->root);
+        while( temp.ptr_it->right_n != nullptr )
+        {
+            temp.ptr_it = temp.ptr_it->right_n;
+        }
+        return temp;
+    }
+    
+
+
 };
 
 
@@ -341,22 +425,30 @@ int main()
     t2.insert(100,34);
     t1.insert(90,32);
 
-    cout<<"t1\n";
-    cout<<t1;
-    cout<<"\n\n\n";
-    cout<<"t2\n";
-    cout<<t2;
-    cout<<"\n\n\n";
+    // cout<<"t1\n";
+    // cout<<t1;
+    // cout<<"\n\n\n";
+    // cout<<"t2\n";
+    // cout<<t2;
+    // cout<<"\n\n\n";
 
-    Treap_t<int,int> t3;
-    t3 = t1;
-    cout<<t3;
+    // Treap_t<int,int>::Iterator it
+
+    // Treap_t<int,int> t3;
+    // t3 = t1;
+    // cout<<t3;
     //t1.preorder();
 
 
-    if(t1.search(90) != nullptr) 
-        cout << "found\n";
-    else 
-        cout << "not found\n";
+    // if(t1.search(90) != nullptr) 
+    //     cout << "found\n";
+    // else 
+    //     cout << "not found\n";
+
+
+
+    auto it = t1.begin();
+    it = t1.end();
+    cout<<*it<<"\n";
 
 }
