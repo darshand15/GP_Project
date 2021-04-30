@@ -289,6 +289,40 @@ class Treap_node_t
         return succ;
     }
 
+    Treap_node_t *inorder_predec_node(Treap_node_t *root)
+    {
+        Treap_node_t *node_x = this;
+        if(node_x -> left_n != nullptr)
+        {
+            node_x = node_x -> left_n;
+
+            while( node_x->right_n != nullptr )
+            {
+                node_x = node_x->right_n;
+            }
+            return node_x;
+        }
+
+        Treap_node_t *pred = nullptr;
+
+        while(root != nullptr)
+        {
+            if(node_x -> node_val.first < root -> node_val.first)
+            {
+                root = root -> left_n;
+            }
+            else if(node_x -> node_val.first > root -> node_val.first)
+            {
+                pred = root;
+                root = root -> right_n;
+            }
+            else
+                break;
+        }
+        
+        return pred;
+    }
+
     Treap_node_t *iterator_begin()
     {
         Treap_node_t *temp = this;
@@ -438,6 +472,21 @@ class Treap_t
             return temp;
         }
 
+        Iterator& operator--()
+        {
+            
+            this->ptr_it = this->ptr_it->inorder_predec_node(this->root);
+            return *this;
+
+        }
+
+        Iterator operator--(int)
+        {
+            Iterator temp(*this);
+            --*this;
+            return temp;
+        }
+
         // Change to lvalue usage
         key_t operator*()
         {
@@ -459,7 +508,6 @@ class Treap_t
             return !(*this == rhs);
         }
 
-
         using difference_type = long;
         using value_type = long;
         using pointer = const long*;
@@ -469,7 +517,6 @@ class Treap_t
 
     Iterator begin()
     {
-
         return Iterator(this -> root -> iterator_begin(), this->root);
     }
 
@@ -538,6 +585,13 @@ int main()
     if(it!=t1.end())
     {
         cout<<"FOUND" <<*it<<"\n";
+
+        cout<<"reverse order\n";
+        while(it!=t1.begin())
+        {
+            cout<<*it<<"\n";
+            it--;
+        }
     }
 
     cout << count(t1.begin(), t1.end(), 40) << "\n";
