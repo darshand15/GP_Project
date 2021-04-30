@@ -2,6 +2,16 @@
 using namespace std;
 #include <algorithm>
 
+// template<class InputIterator, class T>
+//   InputIterator find (InputIterator first, InputIterator last, const T& val)
+// {
+//   while (first!=last) {
+//     if (*first==val) return first;
+//     ++first;
+//   }
+//   return last;
+// }
+
 template <typename key_t, typename priorities_t>
 class Treap_node_t
 {
@@ -245,8 +255,9 @@ class Treap_node_t
         return this->node_val.first;
     }
 
-    Treap_node_t *inorder_succ_node(Treap_node_t *root, Treap_node_t *node_x)
+    Treap_node_t *inorder_succ_node(Treap_node_t *root)
     {
+        Treap_node_t *node_x = this;
         if(node_x -> right_n != nullptr)
         {
             node_x = node_x -> right_n;
@@ -274,8 +285,18 @@ class Treap_node_t
             else
                 break;
         }
-
+        // cout<<*succ<<"\n";
         return succ;
+    }
+
+    Treap_node_t *iterator_begin()
+    {
+        Treap_node_t *temp = this;
+        while(temp -> left_n != nullptr)
+        {
+            temp = temp -> left_n;
+        }
+        return temp;
     }
 
     Treap_node_t *iterator_end()
@@ -290,7 +311,7 @@ class Treap_node_t
 
     bool operator==(const Treap_node_t& rhs)
     {
-        return this->node_val.first == rhs -> node_val.first;
+        return this->node_val.first == rhs.node_val.first;
     }
 
     bool operator!=(const Treap_node_t& rhs)
@@ -377,10 +398,10 @@ class Treap_t
         this->root = this->root->delete_node(this->root,key);
     }
 
-    Treap_node_t<key_t, priorities_t> *inorder_succ(Treap_node_t<key_t, priorities_t> *node_x)
-    {
-        return this->root->inorder_succ_node(this -> root, node_x);
-    }
+    // Treap_node_t<key_t, priorities_t> *inorder_succ(Treap_node_t<key_t, priorities_t> *node_x)
+    // {
+    //     return this->root->inorder_succ_node(this -> root, node_x);
+    // }
 
 
 
@@ -389,10 +410,10 @@ class Treap_t
     {
     private:
         Treap_node_t<key_t,priorities_t> *ptr_it;
-        // Treap_node_t<key_t,priorities_t> *ptr_parent;
+        Treap_node_t<key_t,priorities_t> *root;
 
     public:
-        Iterator(Treap_node_t<key_t,priorities_t> *ptr_it) : ptr_it(ptr_it) {}
+        Iterator(Treap_node_t<key_t,priorities_t> *ptr_it, Treap_node_t<key_t,priorities_t> *root) : ptr_it(ptr_it), root(root) {}
         ~Iterator()
         {
 
@@ -403,7 +424,9 @@ class Treap_t
         Iterator& operator++()
         {
             // return *(this->ptr_it->inorder_succ_node(this -> ptr_it, node_x));
-            return *(this)
+            this->ptr_it = this->ptr_it->inorder_succ_node(this->root);
+
+            return *this;
             // return Iterator(this->ptr_it->inorder_successor());
 
         }
@@ -424,27 +447,39 @@ class Treap_t
         bool operator==(const Iterator& rhs) const
         {
             // return this->ptr_it->node_val.first == rhs.ptr_it->node_val.first;
-            return (*(this -> ptr_it) == *(rhs -> ptr_it));
+            if( this->ptr_it!=nullptr && rhs.ptr_it!=nullptr )
+                return (*(this -> ptr_it) == *(rhs.ptr_it));
+            else if( this->ptr_it==nullptr && rhs.ptr_it==nullptr )
+                return 1;
+            else return 0;
         }
 
         bool operator!=(const Iterator& rhs) const
         {
             return !(*this == rhs);
         }
+
+
+        using difference_type = long;
+        using value_type = long;
+        using pointer = const long*;
+        using reference = const long&;
+        using iterator_category = std::bidirectional_iterator_tag;
     };
 
     Iterator begin()
     {
-        return Iterator(this->root);
+
+        return Iterator(this -> root -> iterator_begin(), this->root);
     }
 
     Iterator end()
     {
-        return Iterator(this -> root -> iterator_end());
+        return Iterator(nullptr, this->root);
     }
+
     
 };
-
 
 int main()
 {
@@ -465,12 +500,12 @@ int main()
     t2.insert(100,34);
     t1.insert(90,32);
 
-    // cout<<"t1\n";
-    // cout<<t1;
-    // cout<<"\n\n\n";
-    // cout<<"t2\n";
-    // cout<<t2;
-    // cout<<"\n\n\n";
+    cout<<"t1\n";
+    cout<<t1;
+    cout<<"\n\n\n";
+    cout<<"t2\n";
+    cout<<t2;
+    cout<<"\n\n\n";
 
     // Treap_t<int,int>::Iterator it
 
@@ -487,14 +522,25 @@ int main()
 
 
 
-    auto it_begin = t1.begin();
-    auto it_end = t1.end();
+    auto it_begin = t2.begin();
+    auto it_end = t2.end();
 
+    auto it = find(t1.begin(), t1.end(), 40);
     while(it_begin != it_end)
     {
+        // if(*it_begin == 40)
+        //     *it_begin = 17203432;
         cout << *it_begin << "\n";
         ++it_begin;
+        // cout << it_begin << "\n";
+
     }
+    if(it!=t1.end())
+    {
+        cout<<"FOUND" <<*it<<"\n";
+    }
+
+    cout << count(t1.begin(), t1.end(), 40) << "\n";
 
     cout << "checked iterator\n";
     // cout<<*it<<"\n";
