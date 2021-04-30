@@ -137,7 +137,7 @@ class Treap_node_t
         {
             delete_treap(root->left_n);
             delete_treap(root->right_n);
-            cout << "DELETING\n" << *root << "\n";
+            // cout << "DELETING\n" << *root << "\n";
             delete root;
         }
     }
@@ -245,6 +245,58 @@ class Treap_node_t
         return this->node_val.first;
     }
 
+    Treap_node_t *inorder_succ_node(Treap_node_t *root, Treap_node_t *node_x)
+    {
+        if(node_x -> right_n != nullptr)
+        {
+            node_x = node_x -> right_n;
+
+            while( node_x->left_n != nullptr )
+            {
+                node_x = node_x->left_n;
+            }
+            return node_x;
+        }
+
+        Treap_node_t *succ = nullptr;
+
+        while(root != nullptr)
+        {
+            if(node_x -> node_val.first < root -> node_val.first)
+            {
+                succ = root;
+                root = root -> left_n;
+            }
+            else if(node_x -> node_val.first > root -> node_val.first)
+            {
+                root = root -> right_n;
+            }
+            else
+                break;
+        }
+
+        return succ;
+    }
+
+    Treap_node_t *iterator_end()
+    {
+        Treap_node_t *temp = this;
+        while(temp -> right_n != nullptr)
+        {
+            temp = temp -> right_n;
+        }
+        return temp;
+    }
+
+    bool operator==(const Treap_node_t& rhs)
+    {
+        return this->node_val.first == rhs -> node_val.first;
+    }
+
+    bool operator!=(const Treap_node_t& rhs)
+    {
+        return !(*this == rhs);
+    }
 
 };
 
@@ -325,6 +377,13 @@ class Treap_t
         this->root = this->root->delete_node(this->root,key);
     }
 
+    Treap_node_t<key_t, priorities_t> *inorder_succ(Treap_node_t<key_t, priorities_t> *node_x)
+    {
+        return this->root->inorder_succ_node(this -> root, node_x);
+    }
+
+
+
 
     class Iterator
     {
@@ -343,21 +402,8 @@ class Treap_t
 
         Iterator& operator++()
         {
-            if( this->ptr_it->right_n != nullptr )
-            {
-                this->ptr_it = this->ptr_it->right_n;
-
-                while( this->ptr_it->left_n != nullptr )
-                {
-                    this->ptr_it = this->ptr_it->left_n;
-                }
-                
-            }
-            else
-            {
-                
-            }
-            return *this;
+            // return *(this->ptr_it->inorder_succ_node(this -> ptr_it, node_x));
+            return *(this)
             // return Iterator(this->ptr_it->inorder_successor());
 
         }
@@ -377,7 +423,8 @@ class Treap_t
 
         bool operator==(const Iterator& rhs) const
         {
-            return this->ptr_it->node_val.first == rhs.ptr_it->node_val.first;
+            // return this->ptr_it->node_val.first == rhs.ptr_it->node_val.first;
+            return (*(this -> ptr_it) == *(rhs -> ptr_it));
         }
 
         bool operator!=(const Iterator& rhs) const
@@ -393,16 +440,9 @@ class Treap_t
 
     Iterator end()
     {
-        Iterator temp(this->root);
-        while( temp.ptr_it->right_n != nullptr )
-        {
-            temp.ptr_it = temp.ptr_it->right_n;
-        }
-        return temp;
+        return Iterator(this -> root -> iterator_end());
     }
     
-
-
 };
 
 
@@ -447,8 +487,16 @@ int main()
 
 
 
-    auto it = t1.begin();
-    it = t1.end();
-    cout<<*it<<"\n";
+    auto it_begin = t1.begin();
+    auto it_end = t1.end();
+
+    while(it_begin != it_end)
+    {
+        cout << *it_begin << "\n";
+        ++it_begin;
+    }
+
+    cout << "checked iterator\n";
+    // cout<<*it<<"\n";
 
 }
