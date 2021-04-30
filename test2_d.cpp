@@ -250,11 +250,13 @@ class Treap_node_t
         return root;
     }
 
+    //function to overload the dereferencing operator for rvalue usage
     key_t operator*()
     {
         return this->node_val.first;
     }
 
+    //function to find the inorder successor of a node
     Treap_node_t *inorder_succ_node(Treap_node_t *root)
     {
         Treap_node_t *node_x = this;
@@ -289,6 +291,7 @@ class Treap_node_t
         return succ;
     }
 
+    //function to find the inorder predecessor of a node
     Treap_node_t *inorder_predec_node(Treap_node_t *root)
     {
         Treap_node_t *node_x = this;
@@ -323,6 +326,7 @@ class Treap_node_t
         return pred;
     }
 
+    //function to find the first node of the tree based on inorder traversal
     Treap_node_t *iterator_begin()
     {
         Treap_node_t *temp = this;
@@ -333,6 +337,7 @@ class Treap_node_t
         return temp;
     }
 
+    //function to find the last node of the tree based on inorder traversal
     Treap_node_t *iterator_end()
     {
         Treap_node_t *temp = this;
@@ -343,11 +348,13 @@ class Treap_node_t
         return temp;
     }
 
+    //function to overload the equality operator
     bool operator==(const Treap_node_t& rhs)
     {
         return this->node_val.first == rhs.node_val.first;
     }
 
+    //function to overload the inequality operator
     bool operator!=(const Treap_node_t& rhs)
     {
         return !(*this == rhs);
@@ -432,94 +439,98 @@ class Treap_t
         this->root = this->root->delete_node(this->root,key);
     }
 
-    // Treap_node_t<key_t, priorities_t> *inorder_succ(Treap_node_t<key_t, priorities_t> *node_x)
-    // {
-    //     return this->root->inorder_succ_node(this -> root, node_x);
-    // }
-
-
-
-
+    
+    //iterator class
     class Iterator
     {
-    private:
-        Treap_node_t<key_t,priorities_t> *ptr_it;
-        Treap_node_t<key_t,priorities_t> *root;
 
-    public:
-        Iterator(Treap_node_t<key_t,priorities_t> *ptr_it, Treap_node_t<key_t,priorities_t> *root) : ptr_it(ptr_it), root(root) {}
-        ~Iterator()
-        {
+        private:
+            Treap_node_t<key_t,priorities_t> *ptr_it;
 
-        }
+            //implementation field pointing to the root of the treap
+            Treap_node_t<key_t,priorities_t> *root;
 
-        // Add bidirectional support
+        public:
 
-        Iterator& operator++()
-        {
-            // return *(this->ptr_it->inorder_succ_node(this -> ptr_it, node_x));
-            this->ptr_it = this->ptr_it->inorder_succ_node(this->root);
-
-            return *this;
-            // return Iterator(this->ptr_it->inorder_successor());
-
-        }
-
-        Iterator operator++(int)
-        {
-            Iterator temp(*this);
-            ++*this;
-            return temp;
-        }
-
-        Iterator& operator--()
-        {
+            //constructor
+            Iterator(Treap_node_t<key_t,priorities_t> *ptr_it, Treap_node_t<key_t,priorities_t> *root) : ptr_it(ptr_it), root(root) {}
             
-            this->ptr_it = this->ptr_it->inorder_predec_node(this->root);
-            return *this;
+            //destructor
+            ~Iterator()
+            {
 
-        }
+            }
 
-        Iterator operator--(int)
-        {
-            Iterator temp(*this);
-            --*this;
-            return temp;
-        }
+            //function to overload the pre increment operator
+            Iterator& operator++()
+            {
+                this->ptr_it = this->ptr_it->inorder_succ_node(this->root);
+                return *this;
+            }
 
-        // Change to lvalue usage
-        key_t operator*()
-        {
-            return **(this->ptr_it);
-        }
+            //function to overload the post increment operator
+            Iterator operator++(int)
+            {
+                Iterator temp(*this);
+                ++*this;
+                return temp;
+            }
 
-        bool operator==(const Iterator& rhs) const
-        {
-            // return this->ptr_it->node_val.first == rhs.ptr_it->node_val.first;
-            if( this->ptr_it!=nullptr && rhs.ptr_it!=nullptr )
-                return (*(this -> ptr_it) == *(rhs.ptr_it));
-            else if( this->ptr_it==nullptr && rhs.ptr_it==nullptr )
-                return 1;
-            else return 0;
-        }
+            //function to overload the pre decrement operator
+            Iterator& operator--()
+            {
+                
+                this->ptr_it = this->ptr_it->inorder_predec_node(this->root);
+                return *this;
 
-        bool operator!=(const Iterator& rhs) const
-        {
-            return !(*this == rhs);
-        }
+            }
 
-        using difference_type = long;
-        using value_type = long;
-        using pointer = const long*;
-        using reference = const long&;
-        using iterator_category = std::bidirectional_iterator_tag;
+            //function to overload the post decrement operator
+            Iterator operator--(int)
+            {
+                Iterator temp(*this);
+                --*this;
+                return temp;
+            }
+
+            //function to overload the dereferencing operator for rvalue usage
+            key_t operator*()
+            {
+                return **(this->ptr_it);
+            }
+
+            //function to overload the equality operator
+            bool operator==(const Iterator& rhs) const
+            {
+                // return this->ptr_it->node_val.first == rhs.ptr_it->node_val.first;
+                if( this->ptr_it!=nullptr && rhs.ptr_it!=nullptr )
+                    return (*(this -> ptr_it) == *(rhs.ptr_it));
+                else if( this->ptr_it==nullptr && rhs.ptr_it==nullptr )
+                    return 1;
+                else return 0;
+            }
+
+            //function to overload the inequality operator
+            bool operator!=(const Iterator& rhs) const
+            {
+                return !(*this == rhs);
+            }
+
+            using difference_type = long;
+            using value_type = long;
+            using pointer = const long*;
+            using reference = const long&;
+            using iterator_category = std::bidirectional_iterator_tag;
     };
 
+
+    //function to define the begin iterator
     Iterator begin()
     {
         return Iterator(this -> root -> iterator_begin(), this->root);
     }
 
+    //function to define the end iterator
     Iterator end()
     {
         return Iterator(nullptr, this->root);
