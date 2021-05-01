@@ -109,12 +109,42 @@ class Treap_node_t
         return root;
     }
 
+    //function to split treap
     void split_node(Treap_node_t **left_sub_treap_root, Treap_node_t **right_sub_treap_root)
     {
         *left_sub_treap_root = this->left_n;
         *right_sub_treap_root = this->right_n;
         this->left_n = nullptr;
         this->right_n = nullptr;
+    }
+
+    //function to merge two treaps
+    void merge_node(Treap_node_t **merged_treap, Treap_node_t *left_sub_treap_n, Treap_node_t *right_sub_treap_n)
+    {
+        if(left_sub_treap_n == nullptr && right_sub_treap_n == nullptr)
+        {
+            *merged_treap = nullptr;
+        }
+        else if(left_sub_treap_n == nullptr)
+        {
+            *merged_treap = right_sub_treap_n;
+        }
+        else if(right_sub_treap_n == nullptr)
+        {
+            *merged_treap = left_sub_treap_n;
+        }
+
+        else if(left_sub_treap_n->node_val.second > right_sub_treap_n->node_val.second)
+        {
+            this->merge_node(&(left_sub_treap_n->right_n), left_sub_treap_n->right_n, right_sub_treap_n);
+            *merged_treap = left_sub_treap_n;
+        }
+
+        else
+        {
+            this->merge_node(&(right_sub_treap_n->left_n), left_sub_treap_n, right_sub_treap_n->left_n);
+            *merged_treap = right_sub_treap_n;
+        }
     }
 
     //function to perform inorder traversal of the treap
@@ -453,6 +483,37 @@ class Treap_t
         this->root->split_node(&(left_sub_treap->root),&(right_sub_treap->root));
     }
 
+    //function to merge two treaps
+    //pre condition : elements of left subtreap are lesser than the elements of the right subtreap
+    void merge(Treap_t *left_sub_treap, Treap_t *right_sub_treap)
+    {
+        if(left_sub_treap == nullptr && right_sub_treap == nullptr)
+        {
+            this->root = nullptr;
+        }
+
+        else if(left_sub_treap == nullptr)
+        {
+            this->root = right_sub_treap->root;
+            right_sub_treap->root = nullptr;
+        }
+        
+        else if(right_sub_treap == nullptr)
+        {
+            this->root = left_sub_treap->root;
+            left_sub_treap->root = nullptr;
+        }
+
+        else
+        {
+            left_sub_treap->root->merge_node(&(this->root), left_sub_treap->root, right_sub_treap->root);
+            left_sub_treap->root = nullptr;
+            right_sub_treap->root = nullptr;
+        }
+
+        
+    }
+
     //function to search for a node in the treap
     Treap_node_t<key_t> *search(key_t search_key)
     {
@@ -679,6 +740,10 @@ int main()
     cout<<"t1\n"<<t1<<"\n\n\n";
     cout<<"t1_l\n"<<t1_l<<"\n\n\n";
     cout<<"t1_r\n"<<t1_r<<"\n\n\n";
+
+    Treap_t<int> t2;
+    t2.merge(&t1_l,&t1_r);
+    cout<<"t2\n\n"<<t2;
     
 
 }
