@@ -497,7 +497,7 @@ class Treap_t
             this->root = right_sub_treap->root;
             right_sub_treap->root = nullptr;
         }
-        
+
         else if(right_sub_treap == nullptr)
         {
             this->root = left_sub_treap->root;
@@ -512,6 +512,32 @@ class Treap_t
         }
 
         
+    }
+
+
+    //function to perform union of two treaps
+    void union_treaps(Treap_t *treap1, Treap_t *treap2)
+    {
+        
+        if(treap1 == nullptr && treap2 == nullptr)
+        {
+            this->root = nullptr;
+        }
+
+        else if(treap1 == nullptr)
+        {
+            *this = *treap2;
+        }
+
+        else if(treap2 == nullptr)
+        {
+            *this = *treap1;
+        }
+
+        else
+        {
+
+        }
     }
 
     //function to search for a node in the treap
@@ -744,6 +770,11 @@ int main()
     Treap_t<int> t2;
     t2.merge(&t1_l,&t1_r);
     cout<<"t2\n\n"<<t2;
+
+    Treap_t<int> *t3 = nullptr;
+    Treap_t<int>t4;
+    t4.union_treaps(t3,&t2);
+    cout<<"t4\n\n"<<t4;
     
 
 }
