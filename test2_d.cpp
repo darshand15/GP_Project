@@ -109,6 +109,14 @@ class Treap_node_t
         return root;
     }
 
+    void split_node(Treap_node_t **left_sub_treap_root, Treap_node_t **right_sub_treap_root)
+    {
+        *left_sub_treap_root = this->left_n;
+        *right_sub_treap_root = this->right_n;
+        this->left_n = nullptr;
+        this->right_n = nullptr;
+    }
+
     //function to perform inorder traversal of the treap
     void inorder_traversal(Treap_node_t<key_t> *root) const
     {
@@ -414,9 +422,10 @@ class Treap_t
     ~Treap_t()
     {
         Treap_node_t<key_t>::delete_treap(this->root);
-        cout<<"delete of treap done\n\n";
+        // cout<<"delete of treap done\n\n";
     }
 
+    
     //function to insert a node into the treap
     void insert(key_t key)
     {
@@ -437,6 +446,26 @@ class Treap_t
         this->root = this->root->insert_node(this->root,key,new_prior);
     }
 
+    //function to split a treap
+    void split(key_t key, Treap_t *left_sub_treap, Treap_t *right_sub_treap)
+    {
+        this->root = this->root->insert_node(this->root, key, 110);
+        this->root->split_node(&(left_sub_treap->root),&(right_sub_treap->root));
+    }
+
+    //function to search for a node in the treap
+    Treap_node_t<key_t> *search(key_t search_key)
+    {
+        return this->root->search_node(this -> root, search_key);
+    }
+
+
+    //function to delete a node in the treap
+    void delete_(key_t key)
+    {
+        this->root = this->root->delete_node(this->root,key);
+    }
+
     //function to overload the put out operator
     friend ostream& operator<<(ostream &o, const Treap_t<key_t> &rhs)
     {
@@ -455,18 +484,6 @@ class Treap_t
     void postorder()
     {
         this->root->postorder_traversal(this->root);
-    }
-
-    Treap_node_t<key_t> *search(key_t search_key)
-    {
-        return this->root->search_node(this -> root, search_key);
-    }
-
-
-    //function to delete a node in the treap
-    void delete_(key_t key)
-    {
-        this->root = this->root->delete_node(this->root,key);
     }
 
     
@@ -646,16 +663,22 @@ int main()
 
 
     //checking copy
-    int a[10];
-    copy(t1.begin(),t1.end(),a);
-    for(int i = 0;i < 7; ++i)
-    {
-        cout<<a[i]<<"\t";
-    }
-    cout<<"\n";
+    // int a[10];
+    // copy(t1.begin(),t1.end(),a);
+    // for(int i = 0;i < 7; ++i)
+    // {
+    //     cout<<a[i]<<"\t";
+    // }
+    // cout<<"\n";
 
-    //to be able to copy from another container to the treap, we need to be able to define the size of the treap
+    //checking split
+    Treap_t<int> t1_l;
+    Treap_t<int> t1_r;
+    t1.split(45,&t1_l,&t1_r);
 
-
+    cout<<"t1\n"<<t1<<"\n\n\n";
+    cout<<"t1_l\n"<<t1_l<<"\n\n\n";
+    cout<<"t1_r\n"<<t1_r<<"\n\n\n";
+    
 
 }
