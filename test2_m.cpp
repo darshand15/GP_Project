@@ -1,6 +1,9 @@
 #include <iostream>
 using namespace std;
+#include <cstdlib>
+#include <vector>
 #include <algorithm>
+
 
 // template<class InputIterator, class T>
 //   InputIterator find (InputIterator first, InputIterator last, const T& val)
@@ -12,13 +15,13 @@ using namespace std;
 //   return last;
 // }
 
-template <typename key_t, typename priorities_t>
+template <typename key_t>
 class Treap_node_t
 {
     private:
 
     //pair that holds key and priority associated with the node
-    pair<key_t, priorities_t> node_val;
+    pair<key_t, int> node_val;
 
     //pointer to the left child of the node
     Treap_node_t *left_n;
@@ -30,7 +33,7 @@ class Treap_node_t
     public:
 
     //constructor
-    Treap_node_t(key_t key, priorities_t prior)
+    Treap_node_t(key_t key, int prior)
     : node_val(key, prior),left_n(nullptr), right_n(nullptr)
     {}
 
@@ -60,7 +63,7 @@ class Treap_node_t
     }
 
     //function to overload put out operator
-    friend ostream& operator<<(ostream &o, const Treap_node_t<key_t, priorities_t> &rhs)
+    friend ostream& operator<<(ostream &o, const Treap_node_t<key_t> &rhs)
     {
         o << "Key: " << rhs.node_val.first << "\n";
         o << "Priority: " << rhs.node_val.second << "\n";
@@ -68,7 +71,7 @@ class Treap_node_t
     }
 
     //function to insert a node into the treap
-    Treap_node_t* insert_node(Treap_node_t* root ,key_t key, priorities_t prior)
+    Treap_node_t* insert_node(Treap_node_t* root ,key_t key, int prior)
     {
         //tree is empty
         if(!root)
@@ -107,7 +110,7 @@ class Treap_node_t
     }
 
     //function to perform inorder traversal of the treap
-    void inorder_traversal(Treap_node_t<key_t, priorities_t> *root) const
+    void inorder_traversal(Treap_node_t<key_t> *root) const
     {
         if(root)
         {
@@ -119,7 +122,7 @@ class Treap_node_t
 
 
     //function to perform preorder traversal of the treap
-    void preorder_traversal(Treap_node_t<key_t, priorities_t> *root) const
+    void preorder_traversal(Treap_node_t<key_t> *root) const
     {
         if(root)
         {
@@ -130,7 +133,7 @@ class Treap_node_t
     }
 
     //function to perform postorder traversal of the treap
-    void postorder_traversal(Treap_node_t<key_t, priorities_t> *root) const
+    void postorder_traversal(Treap_node_t<key_t> *root) const
     {
         if(root)
         {
@@ -141,7 +144,7 @@ class Treap_node_t
     }
 
     //static function to delete a node from the treap
-    static void delete_treap(Treap_node_t<key_t,priorities_t> *root)
+    static void delete_treap(Treap_node_t<key_t> *root)
     {
         if(root)
         {
@@ -153,11 +156,11 @@ class Treap_node_t
     }
 
     //static function to copy a node of the treap
-    static Treap_node_t<key_t,priorities_t>* copy_treap(Treap_node_t<key_t,priorities_t>** lhs, Treap_node_t<key_t,priorities_t> *root)
+    static Treap_node_t<key_t>* copy_treap(Treap_node_t<key_t>** lhs, Treap_node_t<key_t> *root)
     {
         if(root)
         {
-            (*lhs) = new Treap_node_t<key_t, priorities_t>(*root);
+            (*lhs) = new Treap_node_t<key_t>(*root);
             (*lhs)->left_n = copy_treap(&((*lhs)->left_n), root->left_n);
             (*lhs)->right_n = copy_treap(&((*lhs)->right_n), root->right_n);
         }
@@ -363,20 +366,27 @@ class Treap_node_t
 };
 
 
-template <typename key_t, typename priorities_t>
+template <typename key_t>
 class Treap_t
 {
     private:
 
     //pointer to the root of the treap
-    Treap_node_t<key_t,priorities_t> *root;
+    Treap_node_t<key_t> *root;
+
+    //implementation field to decide the way the priorities are defined
+    //'r' for random
+    char choice;
+
+    //implemetation field to store all the priorities defined
+    vector<int> priors;
 
     public:
 
     //constructor
-    Treap_t(Treap_node_t<key_t,priorities_t> *root = nullptr)
+    Treap_t(char choice = 'r',Treap_node_t<key_t> *root = nullptr)
     :
-    root(root)
+    choice(choice), root(root)
     {
 
     }
@@ -384,31 +394,51 @@ class Treap_t
     //copy constructor
     Treap_t(const Treap_t &rhs)
     {
-        Treap_node_t<key_t,priorities_t>::copy_treap(&(this->root), rhs.root);
+        Treap_node_t<key_t>::copy_treap(&(this->root), rhs.root);
+        this->priors.resize(rhs.priors.size());
+        copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
+        this->choice = rhs.choice;
     }
 
     //copy assignment operator
     Treap_t& operator=(const Treap_t &rhs)
     {
-        Treap_node_t<key_t,priorities_t>::copy_treap(&(this->root), rhs.root);
+        Treap_node_t<key_t>::copy_treap(&(this->root), rhs.root);
+        this->priors.resize(rhs.priors.size());
+        copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
+        this->choice = rhs.choice;
         return *this;
     }
 
     //destructor
     ~Treap_t()
     {
-        Treap_node_t<key_t,priorities_t>::delete_treap(this->root);
+        Treap_node_t<key_t>::delete_treap(this->root);
         cout<<"delete of treap done\n\n";
     }
 
     //function to insert a node into the treap
-    void insert(key_t key, priorities_t prior)
+    void insert(key_t key)
     {
-        this->root = this->root->insert_node(this->root,key,prior);
+        int new_prior;
+        switch(this->choice)
+        {
+            case 'r':
+            {
+
+                while((find(priors.begin(),priors.end(),new_prior = rand()%100 + 1))!=priors.end())
+                {
+                    break;
+                }
+                priors.emplace_back(new_prior);
+                break;
+            }
+        }
+        this->root = this->root->insert_node(this->root,key,new_prior);
     }
 
     //function to overload the put out operator
-    friend ostream& operator<<(ostream &o, const Treap_t<key_t, priorities_t> &rhs)
+    friend ostream& operator<<(ostream &o, const Treap_t<key_t> &rhs)
     {
         rhs.root->inorder_traversal(rhs.root);
         //cout<<*(rhs.root);
@@ -427,7 +457,7 @@ class Treap_t
         this->root->postorder_traversal(this->root);
     }
 
-    Treap_node_t<key_t, priorities_t> *search(key_t search_key)
+    Treap_node_t<key_t> *search(key_t search_key)
     {
         return this->root->search_node(this -> root, search_key);
     }
@@ -445,15 +475,19 @@ class Treap_t
     {
 
         private:
-            Treap_node_t<key_t,priorities_t> *ptr_it;
+            Treap_node_t<key_t> *ptr_it;
 
             //implementation field pointing to the root of the treap
-            Treap_node_t<key_t,priorities_t> *root;
+            Treap_node_t<key_t> *root;
 
         public:
 
             //constructor
-            Iterator(Treap_node_t<key_t,priorities_t> *ptr_it, Treap_node_t<key_t,priorities_t> *root) : ptr_it(ptr_it), root(root) {}
+            Iterator(Treap_node_t<key_t> *ptr_it, Treap_node_t<key_t> *root) 
+            : ptr_it(ptr_it), root(root) 
+            {
+
+            }
             
             //destructor
             ~Iterator()
@@ -542,35 +576,35 @@ class Treap_t
 int main()
 {
     cout<<"test\n";
-    Treap_t<int,int> t1;
+    Treap_t<int> t1;
     // t1.insert(1,2);
     // t1.insert(3,4);
     // t1.insert(2,3);
 
 
-    t1.insert(50,15);
-    t1.insert(30,5);
-    t1.insert(70,10);
-    t1.insert(20,2);
-    t1.insert(40,4);
-    t1.insert(80,20);
-    Treap_t<int,int> t2(t1);
-    t2.insert(100,34);
-    t1.insert(90,32);
+    t1.insert(30);
+    t1.insert(50);
+    t1.insert(70);
+    t1.insert(20);
+    t1.insert(40);
+    t1.insert(80);
+    // Treap_t<int> t2(t1);
+    // t2.insert(100);
+    // t1.insert(90);
 
     cout<<"t1\n";
     cout<<t1;
     cout<<"\n\n\n";
-    cout<<"t2\n";
-    cout<<t2;
-    cout<<"\n\n\n";
+    // cout<<"t2\n";
+    // cout<<t2;
+    // cout<<"\n\n\n";
 
     // Treap_t<int,int>::Iterator it
 
     // Treap_t<int,int> t3;
     // t3 = t1;
     // cout<<t3;
-    //t1.preorder();
+    t1.preorder();
 
 
     // if(t1.search(90) != nullptr) 
@@ -580,34 +614,48 @@ int main()
 
 
 
-    auto it_begin = t2.begin();
-    auto it_end = t2.end();
+    // auto it_begin = t2.begin();
+    // auto it_end = t2.end();
 
-    auto it = find(t1.begin(), t1.end(), 40);
-    while(it_begin != it_end)
-    {
-        // if(*it_begin == 40)
-        //     *it_begin = 17203432;
-        cout << *it_begin << "\n";
-        ++it_begin;
-        // cout << it_begin << "\n";
+    // auto it = find(t1.begin(), t1.end(), 40);
+    // while(it_begin != it_end)
+    // {
+    //     // if(*it_begin == 40)
+    //     //     *it_begin = 17203432;
+    //     cout << *it_begin << "\n";
+    //     ++it_begin;
+    //     // cout << it_begin << "\n";
 
-    }
-    if(it!=t1.end())
-    {
-        cout<<"FOUND" <<*it<<"\n";
+    // }
+    // if(it!=t1.end())
+    // {
+    //     cout<<"FOUND" <<*it<<"\n";
 
-        cout<<"reverse order\n";
-        while(it!=t1.begin())
-        {
-            cout<<*it<<"\n";
-            it--;
-        }
-    }
+    //     cout<<"reverse order\n";
+    //     while(it!=t1.begin())
+    //     {
+    //         cout<<*it<<"\n";
+    //         it--;
+    //     }
+    // }
 
-    cout << count(t1.begin(), t1.end(), 40) << "\n";
+    // cout << count(t1.begin(), t1.end(), 40) << "\n";
 
-    cout << "checked iterator\n";
+    // cout << "checked iterator\n";
     // cout<<*it<<"\n";
+
+
+    //checking copy
+    int a[10];
+    copy(t1.begin(),t1.end(),a);
+    for(int i = 0;i < 7; ++i)
+    {
+        cout<<a[i]<<"\t";
+    }
+    cout<<"\n";
+
+    //to be able to copy from another container to the treap, we need to be able to define the size of the treap
+
+
 
 }
