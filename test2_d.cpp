@@ -778,3 +778,8 @@ int main()
     
 
 }
+
+
+// handle merge calling mechanism using both objects and pointers - try and catch
+
+// finish union - using copy ctor, handle calling mech again for both objects and pointers
