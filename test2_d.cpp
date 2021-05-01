@@ -147,6 +147,40 @@ class Treap_node_t
         }
     }
 
+    Treap_node_t* union_node(Treap_node_t *left_treap, Treap_node_t *right_treap)
+    {
+        if(left_treap == nullptr && right_treap == nullptr)
+        {
+            return nullptr;
+        }
+
+        else if(left_treap == nullptr)
+        {
+            return right_treap;
+        }
+
+        else if(right_treap == nullptr)
+        {
+            return left_treap;
+        }
+
+        else if(left_treap->node_val.second < right_treap->node_val.second)
+        {
+            return this->union_node(right_treap, left_treap);
+        }
+
+        Treap_node_t *left_temp, *right_temp;
+
+        right_treap = right_treap->insert_node(right_treap,left_temp->node_val.first,110);
+        right_treap->split_node(&left_temp, &right_temp);
+
+        left_treap->left_n = union_node(left_treap->left_n, left_temp);
+        left_treap->right_n = union_node(left_treap->right_n, right_temp);
+
+        return left_treap;
+
+    }
+
     //function to perform inorder traversal of the treap
     void inorder_traversal(Treap_node_t<key_t> *root) const
     {
@@ -487,18 +521,19 @@ class Treap_t
     //pre condition : elements of left subtreap are lesser than the elements of the right subtreap
     void merge(Treap_t *left_sub_treap, Treap_t *right_sub_treap)
     {
-        if(left_sub_treap == nullptr && right_sub_treap == nullptr)
+        // Handles Call through object address
+        if(left_sub_treap->root == nullptr && right_sub_treap->root == nullptr)
         {
             this->root = nullptr;
         }
 
-        else if(left_sub_treap == nullptr)
+        else if(left_sub_treap->root == nullptr)
         {
             this->root = right_sub_treap->root;
             right_sub_treap->root = nullptr;
         }
 
-        else if(right_sub_treap == nullptr)
+        else if(right_sub_treap->root == nullptr)
         {
             this->root = left_sub_treap->root;
             left_sub_treap->root = nullptr;
@@ -518,25 +553,37 @@ class Treap_t
     //function to perform union of two treaps
     void union_treaps(Treap_t *treap1, Treap_t *treap2)
     {
+        cout<<"test union";
         
-        if(treap1 == nullptr && treap2 == nullptr)
+        if(treap1->root == nullptr && treap2->root == nullptr)
         {
             this->root = nullptr;
+            cout<<"test11\n\n";
         }
 
-        else if(treap1 == nullptr)
+        else if(treap1->root == nullptr)
         {
             *this = *treap2;
+            cout<<"test22\n\n";
         }
 
-        else if(treap2 == nullptr)
+        else if(treap2->root == nullptr)
         {
             *this = *treap1;
+            cout<<"test33\n\n";
         }
 
         else
         {
+            cout<<"testtinhggggg";
+            Treap_t<key_t> *temp1, *temp2;
+            
+            *temp1 = *treap1;
+            *temp2 = *treap2;
 
+            cout<<"before call to union node\n\n";
+            this->root = temp1->root->union_node(temp1->root, temp2->root);
+            cout<<"after call to union node\n\n";
         }
     }
 
@@ -762,24 +809,39 @@ int main()
     Treap_t<int> t1_l;
     Treap_t<int> t1_r;
     t1.split(45,&t1_l,&t1_r);
+    cout<<"after split\n\n";
 
-    cout<<"t1\n"<<t1<<"\n\n\n";
+
+    // cout<<"t1\n"<<t1<<"\n\n\n";
     cout<<"t1_l\n"<<t1_l<<"\n\n\n";
     cout<<"t1_r\n"<<t1_r<<"\n\n\n";
 
-    Treap_t<int> t2;
-    t2.merge(&t1_l,&t1_r);
-    cout<<"t2\n\n"<<t2;
+    // Treap_t<int> t2;
+    // t2.merge(&t1_l,&t1_r);
+    // cout<<"t2\n\n"<<t2;
 
-    Treap_t<int> *t3 = nullptr;
-    Treap_t<int>t4;
-    t4.union_treaps(t3,&t2);
-    cout<<"t4\n\n"<<t4;
+    // Treap_t<int> *t3 = nullptr;
+    // Treap_t<int> *t4 = nullptr;
+    // Treap_t<int> t5;
+    // Treap_t<int> t6;
+    // // t5.merge(t3,t4);
+    // // cout<<"t5\n\n"<<t5;
+    // t5.merge(&t5,&t6);
+    // // cout<<"t4\n\n"<<t4;
+    // cout<<"t5\n\n"<<t5;
+
+    Treap_t<int> t7;
+    cout<<"test obj\n\n";
+    t7.union_treaps(&t1_l,&t1_r);
+    cout<<"test after union\n\n";
+    cout<<"t7\n\n"<<t7;
+    cout<<"t1l\n\n"<<t1_l;
+    cout<<"t1r\n\n"<<t1_r;
     
 
 }
 
 
-// handle merge calling mechanism using both objects and pointers - try and catch
 
-// finish union - using copy ctor, handle calling mech again for both objects and pointers
+
+// finish union - using copy ctor, handle duplicates
