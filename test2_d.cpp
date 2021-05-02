@@ -2,6 +2,8 @@
 using namespace std;
 #include <cstdlib>
 #include <vector>
+#include <deque>
+#include <list>
 #include <algorithm>
 
 
@@ -29,21 +31,88 @@ class Treap_node_t
     //pointer to the right child of the node
     Treap_node_t *right_n;
 
+    //implementation field to mark a node as duplicate
+    int duplicate = 0;
+
 
     public:
 
     //constructor
     Treap_node_t(key_t key, int prior)
     : node_val(key, prior),left_n(nullptr), right_n(nullptr)
-    {}
+    {
+        // cout<<"HERE2\n";
+
+    }
 
     //copy constructor
     Treap_node_t(const Treap_node_t &rhs)
     {
+        // cout<<"HERE2\n";
         this->node_val.first = rhs.node_val.first;
         this->node_val.second = rhs.node_val.second;
         this->right_n = nullptr;
         this->left_n = nullptr;
+    }
+
+    // build constructor
+    template < typename iter_t >
+    Treap_node_t(iter_t first, iter_t last)
+    {
+        if(first != last)
+        {
+            auto mid = first;
+            int n = distance(first, last);
+            advance(mid, n/2);
+            // cout<<"F: "<<*first<<" M: "<<*mid<<"\n";
+            *this = Treap_node_t(*mid, rand()%100 + 1);
+            try
+            {
+                this->left_n = new Treap_node_t(first, mid);
+            }
+            catch(...)
+            {
+                this->left_n = nullptr;
+            }
+            advance(mid, 1);
+            try
+            {
+                this->right_n = new Treap_node_t(mid, last);
+            }
+            catch(...)
+            {
+                this->right_n = nullptr;
+            }
+            this->heapify();
+        }
+        else
+        {
+            throw "No object creation required";
+        }
+    }
+
+    void heapify()
+    {
+        if(this == nullptr)
+        {
+            return ;
+        }
+        Treap_node_t *max_ = this;
+        if( this->left_n != nullptr && this->left_n->node_val.second > max_->node_val.second )
+        {
+            max_ = (this->left_n);
+        }
+        if( this->right_n != nullptr && this->right_n->node_val.second > max_->node_val.second )
+        {
+            max_ = (this->right_n);
+        }
+        if(*max_ != *this)
+        {
+            int temp = this->node_val.second;
+            this->node_val.second = max_->node_val.second;
+            max_->node_val.second = temp;
+            max_->heapify();
+        }
     }
 
     //copy assignment operator
@@ -67,6 +136,7 @@ class Treap_node_t
     {
         o << "Key: " << rhs.node_val.first << "\n";
         o << "Priority: " << rhs.node_val.second << "\n";
+        // o << "Duplicate: " << rhs.duplicate << "\n";
         return o;
     }
 
@@ -103,6 +173,7 @@ class Treap_node_t
 
         else
         {
+            root->duplicate = 1;
             root->node_val.second = prior;
         }
 
@@ -171,7 +242,7 @@ class Treap_node_t
 
         Treap_node_t *left_temp, *right_temp, *root;
 
-        right_treap = right_treap->insert_node(right_treap, left_temp->node_val.first, 110);
+        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 110);
         right_treap->split_node(&left_temp, &right_temp);
         // cout<<"Before new \n";
         root = new Treap_node_t(*left_treap);
@@ -179,10 +250,88 @@ class Treap_node_t
         root->left_n = union_node(left_treap->left_n, left_temp);
         root->right_n = union_node(left_treap->right_n, right_temp);
 
-        // cout<<
-
         return root;
 
+    }
+
+    //function to find the intersection of two treaps
+    Treap_node_t* intersect_node(Treap_node_t *left_treap, Treap_node_t *right_treap)
+    {
+        if(left_treap == nullptr || right_treap == nullptr)
+        {
+            return nullptr;
+        }
+
+        else if(left_treap->node_val.second < right_treap->node_val.second)
+        {
+            return this->intersect_node(right_treap, left_treap);
+        }
+
+        Treap_node_t *left_temp, *right_temp, *root, *left, *right;
+
+        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 110);
+        right_treap->split_node(&left_temp, &right_temp);
+
+        left = intersect_node(left_treap->left_n, left_temp);
+        right = intersect_node(left_treap->right_n, right_temp);
+
+        if(right_treap->duplicate)
+        {
+            // cout<<"HERE in DUP\n";
+            root = new Treap_node_t(*left_treap);
+            root->left_n = left;
+            root->right_n = right;
+            return root;
+        }
+        else
+        {
+            // cout<<"HERE in NOT DUP\n";
+            Treap_node_t *temp = nullptr;
+            
+            left->merge_node(&(temp), left, right);
+            left = nullptr;
+            right = nullptr;
+            return temp;
+        }
+    }
+
+    Treap_node_t *diff_node(Treap_node_t *left_treap, Treap_node_t *right_treap, bool rt_subt)
+    {
+        if(left_treap == nullptr || right_treap == nullptr)
+        {
+            return rt_subt ? left_treap : right_treap;
+        }
+
+        else if(left_treap->node_val.second < right_treap->node_val.second)
+        {
+            return this->diff_node(right_treap, left_treap, !rt_subt);
+        }
+
+        Treap_node_t *left_temp, *right_temp, *root, *left, *right;
+
+        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 110);
+        right_treap->split_node(&left_temp, &right_temp);
+
+        left = diff_node(left_treap->left_n, left_temp, rt_subt);
+        right = diff_node(left_treap->right_n, right_temp, rt_subt);
+
+        if( !right_treap->duplicate && rt_subt )
+        {
+            root = new Treap_node_t(*left_treap);
+            root->left_n = left;
+            root->right_n = right;
+            return root;
+        }
+        else
+        {
+            Treap_node_t *temp = nullptr;
+
+            left->merge_node(&(temp), left, right);
+            left = nullptr;
+            right = nullptr;
+
+            return temp;
+        }
     }
 
     //function to perform inorder traversal of the treap
@@ -476,6 +625,30 @@ class Treap_t
         this->choice = rhs.choice;
     }
 
+    //build constructor
+    template < typename iter_t >
+    Treap_t(iter_t first, iter_t last)
+    {
+        // int n = distance(first, last);
+        // advance(first, n/2);
+        // cout<<"HERE\n";
+        this->choice = 'r';
+        this->root = nullptr;
+        if(!is_sorted(first, last))
+        {
+            while(first != last)
+            {
+                this->insert(*first);
+                ++first;
+            }
+        }
+        else
+        {
+            this->root = new Treap_node_t<int>(first, last);
+        }
+        // this->root = (first, last);
+    }
+
     //copy assignment operator
     Treap_t& operator=(const Treap_t &rhs)
     {
@@ -493,6 +666,11 @@ class Treap_t
         // cout<<"delete of treap done\n\n";
     }
 
+    // template< typename iter_t >
+    // void build(iter_t first, iter_t last)
+    // {
+    //     build_nodes(first, last)
+    // }
     
     //function to insert a node into the treap
     void insert(key_t key)
@@ -592,6 +770,55 @@ class Treap_t
             // cout<<"after call to union node\n\n";
             // cout<<"TEMP1\n\n"<<*temp1<<"\n\n";
             // cout<<"TEMP2\n\n"<<*temp2<<"\n\n";
+        }
+    }
+
+    //function to perform intersection of two treaps
+    void intersect_treaps(Treap_t *treap1, Treap_t *treap2)
+    {
+        if(treap1->root == nullptr || treap2->root == nullptr)
+        {
+            this->root = nullptr;
+        }
+
+        else
+        {
+            Treap_t<key_t> *temp1 = new Treap_t(), *temp2 = new Treap_t();
+            
+            *temp1 = *treap1;
+            *temp2 = *treap2;
+            this->root = temp1->root->intersect_node(temp1->root, temp2->root);
+        }
+        
+    }
+
+
+    //function to find the set difference of two treaps
+    void diff_treap(Treap_t *treap1, Treap_t *treap2)
+    {
+        if(treap1->root == nullptr && treap2->root == nullptr)
+        {
+            this->root = nullptr;
+        }
+
+        else if(treap1->root == nullptr)
+        {
+            *this = *treap2;
+        }
+
+        else if(treap2->root == nullptr)
+        {
+            *this = *treap1;
+        }
+
+        else
+        {
+            Treap_t<key_t> *temp1 = new Treap_t(), *temp2 = new Treap_t();
+            
+            *temp1 = *treap1;
+            *temp2 = *treap2;
+            this->root = temp1->root->diff_node(temp1->root, temp2->root, true);
+            
         }
     }
 
@@ -819,9 +1046,14 @@ int main()
     // cout<<"\n";
 
     //checking split
+    srand(8);
     Treap_t<int> t1_l;
     Treap_t<int> t1_r;
     t1.split(45,&t1_l,&t1_r);
+    t1_l.insert(1000);
+    t1_r.insert(20);
+    t1_r.insert(30);
+    t1_l.insert(50);
     // cout<<"after split\n\n";
 
 
@@ -829,6 +1061,10 @@ int main()
     cout<<"t1_l\n"<<t1_l<<"\n\n\n";
     cout<<"t1_r\n"<<t1_r<<"\n\n\n";
 
+    // Treap_t<int> diff;
+    // diff.diff_treap(&t1_r, &t1_r);
+
+    // cout<<"diff:\n"<<diff<<"\n\n\n";
     // Treap_t<int> t2;
     // t2.merge(&t1_l,&t1_r);
     // cout<<"t2\n\n"<<t2;
@@ -843,18 +1079,38 @@ int main()
     // // cout<<"t4\n\n"<<t4;
     // cout<<"t5\n\n"<<t5;
 
-    Treap_t<int> t8;
-    // cout<<"test obj\n\n";
-    t8.union_treaps(&t1_l, &t1_r);
+    // Treap_t<int> t8;
+    Treap_t<int> t9;
+    t9.insert(130);
+    t9.insert(140);
+    t9.insert(120);
+    t9.insert(150);
+
+    Treap_t<int> diff;
+    diff.diff_treap(&t9, &t1_r);
+
+    cout<<"diff:\n"<<diff<<"\n\n\n";
+    // // cout<<"test obj\n\n";
+    // cout<<"t1_l\n\n"<<t1_l;
+    // cout<<"t9\n\n"<<t9;
+    // t8.union_treaps(&t1_l, &t1_r);
+    // t8.intersect_treaps(&t1_l, &t9);
+    // cout<<"t8\n\n"<<t8;
+    // t8.union_treaps(&t8, &t8);
     // cout<<"test after union\n\n";
-    cout<<"t7\n\n"<<t8;
-    cout<<"t1l\n\n"<<t1_l;
-    cout<<"t1r\n\n"<<t1_r;
+    // cout<<"t8\n\n"<<t8;
+    // cout<<"t1l\n\n"<<t1_l;
+    // cout<<"t1r\n\n"<<t1_r;
+
+    // vector<int> a1 = {1, 2, 3, 5};
+    // deque<int> a2 = {4, 5, 7, 1, 2};
+    // list<int> a3 = {1, 2, 3, 5};
+    // Treap_t<int> b1(a1.begin(), a1.end());
+    // Treap_t<int> b2(a2.begin(), a2.end());
+    // Treap_t<int> b3(a3.begin(), a3.end());
+    // cout << "b1:\n" << b1 << "\n";
+    // cout << "b2:\n" << b2 << "\n";
+    // cout << "b3:\n" << b3 << "\n";
     
 
 }
-
-
-
-
-// finish union - using copy ctor, handle duplicates
