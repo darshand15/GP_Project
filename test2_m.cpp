@@ -147,6 +147,44 @@ class Treap_node_t
         }
     }
 
+    Treap_node_t* union_node(Treap_node_t *left_treap, Treap_node_t *right_treap)
+    {
+        if(left_treap == nullptr && right_treap == nullptr)
+        {
+            return nullptr;
+        }
+
+        else if(left_treap == nullptr)
+        {
+            return right_treap;
+        }
+
+        else if(right_treap == nullptr)
+        {
+            return left_treap;
+        }
+
+        else if(left_treap->node_val.second < right_treap->node_val.second)
+        {
+            return this->union_node(right_treap, left_treap);
+        }
+
+        Treap_node_t *left_temp, *right_temp, *root;
+
+        right_treap = right_treap->insert_node(right_treap, left_temp->node_val.first, 110);
+        right_treap->split_node(&left_temp, &right_temp);
+        // cout<<"Before new \n";
+        root = new Treap_node_t(*left_treap);
+        // cout<<"After new \n";
+        root->left_n = union_node(left_treap->left_n, left_temp);
+        root->right_n = union_node(left_treap->right_n, right_temp);
+
+        // cout<<
+
+        return root;
+
+    }
+
     //function to perform inorder traversal of the treap
     void inorder_traversal(Treap_node_t<key_t> *root) const
     {
@@ -519,25 +557,41 @@ class Treap_t
     //function to perform union of two treaps
     void union_treaps(Treap_t *treap1, Treap_t *treap2)
     {
+        // cout<<"test union";
         
         if(treap1->root == nullptr && treap2->root == nullptr)
         {
             this->root = nullptr;
+            // cout<<"test11\n\n";
         }
 
         else if(treap1->root == nullptr)
         {
             *this = *treap2;
+            // cout<<"test22\n\n";
         }
 
         else if(treap2->root == nullptr)
         {
             *this = *treap1;
+            // cout<<"test33\n\n";
         }
 
         else
         {
+            // cout<<"testtinhggggg";
+            Treap_t<key_t> *temp1 = new Treap_t(), *temp2 = new Treap_t();
             
+            *temp1 = *treap1;
+            *temp2 = *treap2;
+
+            // cout<<"TEMP1\n\n"<<*temp1<<"\n\n";
+            // cout<<"TEMP2\n\n"<<*temp2<<"\n\n";
+            // cout<<"before call to union node\n\n";
+            this->root = temp1->root->union_node(temp1->root, temp2->root);
+            // cout<<"after call to union node\n\n";
+            // cout<<"TEMP1\n\n"<<*temp1<<"\n\n";
+            // cout<<"TEMP2\n\n"<<*temp2<<"\n\n";
         }
     }
 
@@ -686,7 +740,12 @@ int main()
     // t1.insert(3,4);
     // t1.insert(2,3);
 
+    // for(int i=0; i<123127; i++)
+    // {
+    //     t1.insert(rand());
+    // }
 
+    
     t1.insert(30);
     t1.insert(50);
     t1.insert(70);
@@ -763,24 +822,34 @@ int main()
     Treap_t<int> t1_l;
     Treap_t<int> t1_r;
     t1.split(45,&t1_l,&t1_r);
+    // cout<<"after split\n\n";
 
-    cout<<"t1\n"<<t1<<"\n\n\n";
+
+    // cout<<"t1\n"<<t1<<"\n\n\n";
     cout<<"t1_l\n"<<t1_l<<"\n\n\n";
     cout<<"t1_r\n"<<t1_r<<"\n\n\n";
 
-    Treap_t<int> t2;
-    t2.merge(&t1_l,&t1_r);
-    cout<<"t2\n\n"<<t2;
+    // Treap_t<int> t2;
+    // t2.merge(&t1_l,&t1_r);
+    // cout<<"t2\n\n"<<t2;
 
-    Treap_t<int> *t3 = nullptr;
-    Treap_t<int> *t4 = nullptr;
-    Treap_t<int> t5;
-    Treap_t<int> t6;
-    // t5.merge(t3,t4);
+    // Treap_t<int> *t3 = nullptr;
+    // Treap_t<int> *t4 = nullptr;
+    // Treap_t<int> t5;
+    // Treap_t<int> t6;
+    // // t5.merge(t3,t4);
+    // // cout<<"t5\n\n"<<t5;
+    // t5.merge(&t5,&t6);
+    // // cout<<"t4\n\n"<<t4;
     // cout<<"t5\n\n"<<t5;
-    t5.merge(&t5,&t6);
-    // cout<<"t4\n\n"<<t4;
-    cout<<"t5\n\n"<<t5;
+
+    Treap_t<int> t8;
+    // cout<<"test obj\n\n";
+    t8.union_treaps(&t1_l, &t1_r);
+    // cout<<"test after union\n\n";
+    cout<<"t7\n\n"<<t8;
+    cout<<"t1l\n\n"<<t1_l;
+    cout<<"t1r\n\n"<<t1_r;
     
 
 }
@@ -788,4 +857,4 @@ int main()
 
 
 
-// finish union - using copy ctor
+// finish union - using copy ctor, handle duplicates
