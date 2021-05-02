@@ -1009,8 +1009,23 @@ class Treap_t
         
     }
 
+    //function to replace a node with another node
+    void replace(Iterator first, Iterator last, key_t old_value, key_t new_value)
+    {
+        if(this->find(first, last, old_value)!=last)
+        {
+            this->delete_(old_value);
+            this->insert(new_value);
+        }
+        
+    }
+
     
 };
+
+bool IsOdd (int i) {
+  return ((i%2)==1);
+}
 
 int main()
 {
@@ -1168,15 +1183,17 @@ int main()
     cout << *(b2.find(b2.begin(), b2.end(), 5))<<"\n";
     cout << *(b2.find(++++b2.begin(), b2.end(), 7))<<"\n";
     cout << *(b2.find(b2.begin(), ++++++b2.begin(), 2))<<"\n";
-    auto it = b2.find(b2.begin(), b2.end(), 213123);
-    if(it != b2.end())
-    {
-        cout<<"Found : "<<*it<<"\n";
-    }
-    else
-    {
-        cout<<"Not found\n";
-    }
+    cout << "b2:\n" << b2 << "\n";
+    b2.replace(++b2.begin(), b2.end(), 14312, 10);
+    cout << "b2:\n" << b2 << "\n";
+    // if(it != b2.end())
+    // {
+    //     cout<<"Found : "<<*it<<"\n";
+    // }
+    // else
+    // {
+    //     cout<<"Not found\n";
+    // }
     
 
 }
