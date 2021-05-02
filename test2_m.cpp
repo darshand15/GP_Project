@@ -31,6 +31,9 @@ class Treap_node_t
     //pointer to the right child of the node
     Treap_node_t *right_n;
 
+    //implementation field to mark a node as duplicate
+    int duplicate = 0;
+
 
     public:
 
@@ -45,7 +48,7 @@ class Treap_node_t
     //copy constructor
     Treap_node_t(const Treap_node_t &rhs)
     {
-        cout<<"HERE2\n";
+        // cout<<"HERE2\n";
         this->node_val.first = rhs.node_val.first;
         this->node_val.second = rhs.node_val.second;
         this->right_n = nullptr;
@@ -133,6 +136,7 @@ class Treap_node_t
     {
         o << "Key: " << rhs.node_val.first << "\n";
         o << "Priority: " << rhs.node_val.second << "\n";
+        // o << "Duplicate: " << rhs.duplicate << "\n";
         return o;
     }
 
@@ -169,6 +173,7 @@ class Treap_node_t
 
         else
         {
+            root->duplicate = 1;
             root->node_val.second = prior;
         }
 
@@ -237,7 +242,7 @@ class Treap_node_t
 
         Treap_node_t *left_temp, *right_temp, *root;
 
-        right_treap = right_treap->insert_node(right_treap, left_temp->node_val.first, 110);
+        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 110);
         right_treap->split_node(&left_temp, &right_temp);
         // cout<<"Before new \n";
         root = new Treap_node_t(*left_treap);
@@ -245,10 +250,51 @@ class Treap_node_t
         root->left_n = union_node(left_treap->left_n, left_temp);
         root->right_n = union_node(left_treap->right_n, right_temp);
 
-        // cout<<
-
         return root;
 
+    }
+
+    //function to find the intersection of two treaps
+    Treap_node_t* intersect_node(Treap_node_t *left_treap, Treap_node_t *right_treap)
+    {
+        if(left_treap == nullptr || right_treap == nullptr)
+        {
+            return nullptr;
+        }
+
+        else if(left_treap->node_val.second < right_treap->node_val.second)
+        {
+            return this->intersect_node(right_treap, left_treap);
+        }
+
+        Treap_node_t *left_temp, *right_temp, *root, *left, *right;
+
+        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 110);
+        right_treap->split_node(&left_temp, &right_temp);
+
+        left = intersect_node(left_treap->left_n, left_temp);
+        right = intersect_node(left_treap->right_n, right_temp);
+
+        if(right_treap->duplicate)
+        {
+            cout<<"HERE in DUP\n";
+            root = new Treap_node_t(*left_treap);
+            root->left_n = left;
+            root->right_n = right;
+            return root;
+        }
+        else
+        {
+            cout<<"HERE in NOT DUP\n";
+            Treap_node_t *temp = nullptr;
+            // merge_node(left, right);
+
+
+            left->merge_node(&(temp), left, right);
+            left = nullptr;
+            right = nullptr;
+            return temp;
+        }
     }
 
     //function to perform inorder traversal of the treap
@@ -690,6 +736,25 @@ class Treap_t
         }
     }
 
+    //function to perform intersection of two treaps
+    void intersect_treaps(Treap_t *treap1, Treap_t *treap2)
+    {
+        if(treap1->root == nullptr || treap2->root == nullptr)
+        {
+            this->root = nullptr;
+        }
+
+        else
+        {
+            Treap_t<key_t> *temp1 = new Treap_t(), *temp2 = new Treap_t();
+            
+            *temp1 = *treap1;
+            *temp2 = *treap2;
+            this->root = temp1->root->intersect_node(temp1->root, temp2->root);
+        }
+        
+    }
+
     //function to search for a node in the treap
     Treap_node_t<key_t> *search(key_t search_key)
     {
@@ -914,9 +979,14 @@ int main()
     // cout<<"\n";
 
     //checking split
+    srand(8);
     Treap_t<int> t1_l;
     Treap_t<int> t1_r;
     t1.split(45,&t1_l,&t1_r);
+    t1_l.insert(1000);
+    t1_r.insert(20);
+    t1_r.insert(30);
+    t1_l.insert(50);
     // cout<<"after split\n\n";
 
 
@@ -938,23 +1008,33 @@ int main()
     // // cout<<"t4\n\n"<<t4;
     // cout<<"t5\n\n"<<t5;
 
-    // Treap_t<int> t8;
-    // // cout<<"test obj\n\n";
-    // t8.union_treaps(&t1_l, &t1_r);
-    // // cout<<"test after union\n\n";
+    Treap_t<int> t8;
+    Treap_t<int> t9;
+    t9.insert(130);
+    t9.insert(140);
+    t9.insert(120);
+    t9.insert(150);
+    // cout<<"test obj\n\n";
+    cout<<"t1_l\n\n"<<t1_l;
+    cout<<"t9\n\n"<<t9;
+    t8.union_treaps(&t1_l, &t1_r);
+    t8.intersect_treaps(&t1_l, &t9);
+    cout<<"t8\n\n"<<t8;
+    // t8.union_treaps(&t8, &t8);
+    // cout<<"test after union\n\n";
     // cout<<"t8\n\n"<<t8;
     // cout<<"t1l\n\n"<<t1_l;
     // cout<<"t1r\n\n"<<t1_r;
 
-    vector<int> a1 = {1, 2, 3, 5};
-    deque<int> a2 = {4, 5, 7, 1, 2};
-    list<int> a3 = {1, 2, 3, 5};
-    Treap_t<int> b1(a1.begin(), a1.end());
-    Treap_t<int> b2(a2.begin(), a2.end());
-    Treap_t<int> b3(a3.begin(), a3.end());
-    cout << "b1:\n" << b1 << "\n";
-    cout << "b2:\n" << b2 << "\n";
-    cout << "b3:\n" << b3 << "\n";
+    // vector<int> a1 = {1, 2, 3, 5};
+    // deque<int> a2 = {4, 5, 7, 1, 2};
+    // list<int> a3 = {1, 2, 3, 5};
+    // Treap_t<int> b1(a1.begin(), a1.end());
+    // Treap_t<int> b2(a2.begin(), a2.end());
+    // Treap_t<int> b3(a3.begin(), a3.end());
+    // cout << "b1:\n" << b1 << "\n";
+    // cout << "b2:\n" << b2 << "\n";
+    // cout << "b3:\n" << b3 << "\n";
     
 
 }
