@@ -740,7 +740,12 @@ int main()
     // t1.insert(3,4);
     // t1.insert(2,3);
 
+    // for(int i=0; i<123127; i++)
+    // {
+    //     t1.insert(rand());
+    // }
 
+    
     t1.insert(30);
     t1.insert(50);
     t1.insert(70);
