@@ -656,7 +656,7 @@ class Treap_t
     {
         Treap_node_t<key_t>::copy_treap(&(this->root), rhs.root);
         this->priors.resize(rhs.priors.size());
-        copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
+        std::copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
         this->choice = rhs.choice;
         return *this;
     }
@@ -937,6 +937,13 @@ class Treap_t
             {
                 return this->ptr_it == nullptr;
             }
+            
+            //function to copy from source container to destination container
+            // template<typename iter_t>
+            // void copy_iter(iter_t first, iter_t last, Iterator dest)
+            // {
+            //     dest.ptr_it = new Treap_node_t<key_t>(first, last);
+            // }
 
             using difference_type = long;
             using value_type = long;
@@ -1019,6 +1026,13 @@ class Treap_t
         }
         
     }
+    
+    //member copy function that copies from source container to destination container
+    // template<typename T>
+    // void copy(T first, T last, Iterator dest)
+    // {
+    //     dest.copy_iter(first, last, dest);        
+    // }
 
     
 };
@@ -1176,6 +1190,8 @@ int main()
     Treap_t<int> b1(a1.begin(), a1.end());
     Treap_t<int> b2(a2.begin(), a2.end());
     Treap_t<int> b3(a3.begin(), a3.end());
+    Treap_t<int> b4;
+    // copy(a1.begin(), a1.end(), b4.begin());
     cout << "b1:\n" << b1 << "\n";
     cout << "b2:\n" << b2 << "\n";
     cout << "b3:\n" << b3 << "\n";
@@ -1184,8 +1200,12 @@ int main()
     cout << *(b2.find(++++b2.begin(), b2.end(), 7))<<"\n";
     cout << *(b2.find(b2.begin(), ++++++b2.begin(), 2))<<"\n";
     cout << "b2:\n" << b2 << "\n";
+    
     b2.replace(++b2.begin(), b2.end(), 14312, 10);
+    
     cout << "b2:\n" << b2 << "\n";
+    Treap_t<int> b5;
+    // b5.copy(a2.begin(), a2.end(), b5.begin());
     // if(it != b2.end())
     // {
     //     cout<<"Found : "<<*it<<"\n";
