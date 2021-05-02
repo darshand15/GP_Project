@@ -2,6 +2,8 @@
 using namespace std;
 #include <cstdlib>
 #include <vector>
+#include <deque>
+#include <list>
 #include <algorithm>
 
 
@@ -35,15 +37,79 @@ class Treap_node_t
     //constructor
     Treap_node_t(key_t key, int prior)
     : node_val(key, prior),left_n(nullptr), right_n(nullptr)
-    {}
+    {
+        // cout<<"HERE2\n";
+
+    }
 
     //copy constructor
     Treap_node_t(const Treap_node_t &rhs)
     {
+        cout<<"HERE2\n";
         this->node_val.first = rhs.node_val.first;
         this->node_val.second = rhs.node_val.second;
         this->right_n = nullptr;
         this->left_n = nullptr;
+    }
+
+    // build constructor
+    template < typename iter_t >
+    Treap_node_t(iter_t first, iter_t last)
+    {
+        if(first != last)
+        {
+            auto mid = first;
+            int n = distance(first, last);
+            advance(mid, n/2);
+            // cout<<"F: "<<*first<<" M: "<<*mid<<"\n";
+            *this = Treap_node_t(*mid, rand()%100 + 1);
+            try
+            {
+                this->left_n = new Treap_node_t(first, mid);
+            }
+            catch(...)
+            {
+                this->left_n = nullptr;
+            }
+            advance(mid, 1);
+            try
+            {
+                this->right_n = new Treap_node_t(mid, last);
+            }
+            catch(...)
+            {
+                this->right_n = nullptr;
+            }
+            this->heapify();
+        }
+        else
+        {
+            throw "No object creation required";
+        }
+    }
+
+    void heapify()
+    {
+        if(this == nullptr)
+        {
+            return ;
+        }
+        Treap_node_t *max_ = this;
+        if( this->left_n != nullptr && this->left_n->node_val.second > max_->node_val.second )
+        {
+            max_ = (this->left_n);
+        }
+        if( this->right_n != nullptr && this->right_n->node_val.second > max_->node_val.second )
+        {
+            max_ = (this->right_n);
+        }
+        if(*max_ != *this)
+        {
+            int temp = this->node_val.second;
+            this->node_val.second = max_->node_val.second;
+            max_->node_val.second = temp;
+            max_->heapify();
+        }
     }
 
     //copy assignment operator
@@ -476,6 +542,30 @@ class Treap_t
         this->choice = rhs.choice;
     }
 
+    //build constructor
+    template < typename iter_t >
+    Treap_t(iter_t first, iter_t last)
+    {
+        // int n = distance(first, last);
+        // advance(first, n/2);
+        // cout<<"HERE\n";
+        this->choice = 'r';
+        this->root = nullptr;
+        if(!is_sorted(first, last))
+        {
+            while(first != last)
+            {
+                this->insert(*first);
+                ++first;
+            }
+        }
+        else
+        {
+            this->root = new Treap_node_t<int>(first, last);
+        }
+        // this->root = (first, last);
+    }
+
     //copy assignment operator
     Treap_t& operator=(const Treap_t &rhs)
     {
@@ -493,6 +583,11 @@ class Treap_t
         // cout<<"delete of treap done\n\n";
     }
 
+    // template< typename iter_t >
+    // void build(iter_t first, iter_t last)
+    // {
+    //     build_nodes(first, last)
+    // }
     
     //function to insert a node into the treap
     void insert(key_t key)
@@ -843,13 +938,23 @@ int main()
     // // cout<<"t4\n\n"<<t4;
     // cout<<"t5\n\n"<<t5;
 
-    Treap_t<int> t8;
-    // cout<<"test obj\n\n";
-    t8.union_treaps(&t1_l, &t1_r);
-    // cout<<"test after union\n\n";
-    cout<<"t7\n\n"<<t8;
-    cout<<"t1l\n\n"<<t1_l;
-    cout<<"t1r\n\n"<<t1_r;
+    // Treap_t<int> t8;
+    // // cout<<"test obj\n\n";
+    // t8.union_treaps(&t1_l, &t1_r);
+    // // cout<<"test after union\n\n";
+    // cout<<"t8\n\n"<<t8;
+    // cout<<"t1l\n\n"<<t1_l;
+    // cout<<"t1r\n\n"<<t1_r;
+
+    vector<int> a1 = {1, 2, 3, 5};
+    deque<int> a2 = {4, 5, 7, 1, 2};
+    list<int> a3 = {1, 2, 3, 5};
+    Treap_t<int> b1(a1.begin(), a1.end());
+    Treap_t<int> b2(a2.begin(), a2.end());
+    Treap_t<int> b3(a3.begin(), a3.end());
+    cout << "b1:\n" << b1 << "\n";
+    cout << "b2:\n" << b2 << "\n";
+    cout << "b3:\n" << b3 << "\n";
     
 
 }
