@@ -93,10 +93,6 @@ class Treap_node_t
 
     void heapify()
     {
-        if(this == nullptr)
-        {
-            return ;
-        }
         Treap_node_t *max_ = this;
         if( this->left_n != nullptr && this->left_n->node_val.second > max_->node_val.second )
         {
@@ -419,15 +415,21 @@ class Treap_node_t
     //function to search for a node in the treap
     Treap_node_t *search_node(Treap_node_t *root, key_t search_key)
     {
-        if(root == nullptr || (root -> node_val).first == search_key)
+        if(root == nullptr || root->node_val.first == search_key)
         {
             return root;
         }
-        if((root -> node_val).first < search_key)
+
+        else if(root->node_val.first < search_key)
         {
             return search_node(root -> right_n, search_key);
         }
-        return search_node(root -> left_n, search_key);
+
+        else if(root->node_val.first > search_key)
+        {
+            return search_node(root -> left_n, search_key);
+        }
+        return nullptr;
     }
 
     //function to delete a node in the treap
@@ -681,7 +683,7 @@ class Treap_t
             case 'r':
             {
 
-                while((find(priors.begin(),priors.end(),new_prior = rand()%100 + 1))!=priors.end())
+                while((std::find(priors.begin(),priors.end(),new_prior = rand()%100 + 1))!=priors.end())
                 {
                     break;
                 }
@@ -822,13 +824,7 @@ class Treap_t
         }
     }
 
-    //function to search for a node in the treap
-    Treap_node_t<key_t> *search(key_t search_key)
-    {
-        return this->root->search_node(this -> root, search_key);
-    }
-
-
+    
     //function to delete a node in the treap
     void delete_(key_t key)
     {
@@ -936,6 +932,12 @@ class Treap_t
                 return !(*this == rhs);
             }
 
+            //function to find if the iterator is the end of the container
+            bool is_end()
+            {
+                return this->ptr_it == nullptr;
+            }
+
             using difference_type = long;
             using value_type = long;
             using pointer = const long*;
@@ -954,6 +956,57 @@ class Treap_t
     Iterator end()
     {
         return Iterator(nullptr, this->root);
+    }
+
+    //function to search for a node in the treap
+    Iterator find(Iterator first, Iterator last, key_t search_key)
+    {
+        if(first != last)
+        {
+            if( !last.is_end() )
+            {
+                auto last_orig = last;
+                auto last_temp = --last;
+                if(search_key >= *first && search_key <= *last_temp)
+                {
+                    Treap_node_t<key_t>* temp = this->root->search_node(this -> root, search_key);
+                    if(temp != nullptr)
+                    {
+                        return Iterator(temp, this->root);
+                    }
+                    else 
+                    {
+                        return last_orig;
+                    }
+                }
+                else
+                {
+                    return last_orig;
+                }
+            }
+            else
+            {
+                // auto last_temp = Iterator(this->root->iterator_end(), this->root);
+                if(search_key >= *first)
+                {
+                    Treap_node_t<key_t>* temp = this->root->search_node(this -> root, search_key);
+                    if(temp != nullptr)
+                    {
+                        return Iterator(temp, this->root);
+                    }
+                    else 
+                    {
+                        return last;
+                    }
+                }
+                else
+                {
+                    return last;
+                }
+            }
+        }
+        return last;
+        
     }
 
     
@@ -1102,15 +1155,28 @@ int main()
     // cout<<"t1l\n\n"<<t1_l;
     // cout<<"t1r\n\n"<<t1_r;
 
-    // vector<int> a1 = {1, 2, 3, 5};
-    // deque<int> a2 = {4, 5, 7, 1, 2};
-    // list<int> a3 = {1, 2, 3, 5};
-    // Treap_t<int> b1(a1.begin(), a1.end());
-    // Treap_t<int> b2(a2.begin(), a2.end());
-    // Treap_t<int> b3(a3.begin(), a3.end());
-    // cout << "b1:\n" << b1 << "\n";
-    // cout << "b2:\n" << b2 << "\n";
-    // cout << "b3:\n" << b3 << "\n";
+    vector<int> a1 = {1, 2, 3, 5};
+    deque<int> a2 = {4, 5, 7, 1, 2};
+    list<int> a3 = {1, 2, 3, 5};
+    Treap_t<int> b1(a1.begin(), a1.end());
+    Treap_t<int> b2(a2.begin(), a2.end());
+    Treap_t<int> b3(a3.begin(), a3.end());
+    cout << "b1:\n" << b1 << "\n";
+    cout << "b2:\n" << b2 << "\n";
+    cout << "b3:\n" << b3 << "\n";
+
+    cout << *(b2.find(b2.begin(), b2.end(), 5))<<"\n";
+    cout << *(b2.find(++++b2.begin(), b2.end(), 7))<<"\n";
+    cout << *(b2.find(b2.begin(), ++++++b2.begin(), 2))<<"\n";
+    auto it = b2.find(b2.begin(), b2.end(), 213123);
+    if(it != b2.end())
+    {
+        cout<<"Found : "<<*it<<"\n";
+    }
+    else
+    {
+        cout<<"Not found\n";
+    }
     
 
 }
