@@ -1,5 +1,6 @@
 #include "demo_final.cpp"
-
+#include <deque>
+#include <list>
 
 
 bool IsOdd (int i) 

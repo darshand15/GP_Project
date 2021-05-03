@@ -127,7 +127,7 @@ int main()
     t_3.replace(t_3.begin(), t_3.end(), "D", "X");
     t_3.replace(t_3.begin(), t_3.end(), "Y", "K");
 
-    cout<<"T_3 after replacing P with R and D with X"
+    cout<<"T_3 after replacing P with R and D with X and ";
 
     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
 
