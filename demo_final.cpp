@@ -168,10 +168,19 @@ class Treap_node_t
     //function to split treap
     void split_node(Treap_node_t **left_sub_treap_root, Treap_node_t **right_sub_treap_root)
     {
-        *left_sub_treap_root = this->left_n;
-        *right_sub_treap_root = this->right_n;
-        this->left_n = nullptr;
-        this->right_n = nullptr;
+        if(!this->duplicate)
+        {
+            *left_sub_treap_root = this->left_n;
+            *right_sub_treap_root = this->right_n;
+            this->left_n = nullptr;
+            this->right_n = nullptr;
+        }
+        else
+        {
+            *left_sub_treap_root = this->left_n;
+            *right_sub_treap_root = this;
+            this->left_n = nullptr;
+        }
     }
 
     //function to merge two treaps

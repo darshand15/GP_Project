@@ -123,11 +123,11 @@ int main()
 
     cout<<"Member Replace\n\n";
 
-    t_3.replace(t_3.begin(), t_3.end(), "P", "R");
-    t_3.replace(t_3.begin(), t_3.end(), "D", "X");
+    t_3.replace(t_3.begin(), t_3.end(), "B", "H");
+    t_3.replace(t_3.begin(), t_3.end(), "D", "F");
     t_3.replace(t_3.begin(), t_3.end(), "Y", "K");
 
-    cout<<"T_3 after replacing P with R and D with X and ";
+    cout<<"T_3 after replacing B with H and D with F and trying to replace a non existent key Y with K" << t_3 << "\n\n";
 
     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
 
