@@ -160,13 +160,14 @@ class Treap_node_t
         {
             root->duplicate = 1;
             root->node_val.second = prior;
+            root->heapify();
         }
 
         return root;
     }
 
     //function to split treap
-    void split_node(Treap_node_t **left_sub_treap_root, Treap_node_t **right_sub_treap_root)
+    Treap_node_t* split_node(Treap_node_t **left_sub_treap_root, Treap_node_t **right_sub_treap_root)
     {
         if(!this->duplicate)
         {
@@ -174,12 +175,16 @@ class Treap_node_t
             *right_sub_treap_root = this->right_n;
             this->left_n = nullptr;
             this->right_n = nullptr;
+            return this;
         }
         else
         {
             *left_sub_treap_root = this->left_n;
             *right_sub_treap_root = this;
+            // *right_sub_treap_root = (*right_sub_treap_root)->delete_node(*right_sub_treap_root, this->node_val.first);
+            // *right_sub_treap_root = (*right_sub_treap_root)->insert_node(*right_sub_treap_root, this->node_val.first, rand()%100+1);
             this->left_n = nullptr;
+            return nullptr;
         }
     }
 
@@ -458,14 +463,14 @@ class Treap_node_t
             root->right_n = delete_node(root->right_n,key);
         }
 
-        else if(root->left_n != nullptr)
+        else if(root->left_n == nullptr)
         {
             Treap_node_t* temp = root->right_n;
             delete root;
             root = temp;
         }
 
-        else if(root->right_n != nullptr)
+        else if(root->right_n == nullptr)
         {
             Treap_node_t* temp = root->left_n;
             delete root;
@@ -745,7 +750,14 @@ class Treap_t
     void split(key_t key, Treap_t *left_sub_treap, Treap_t *right_sub_treap)
     {
         this->root = this->root->insert_node(this->root, key, 110);
-        this->root->split_node(&(left_sub_treap->root),&(right_sub_treap->root));
+        this->root = this->root->split_node(&(left_sub_treap->root),&(right_sub_treap->root));
+        if(this->root == nullptr)
+        {
+            // right_sub_treap->delete_(key);
+            // cout<<"RST\n"<<*right_sub_treap;
+            right_sub_treap->insert(key);
+        }
+        
     }
 
     //function to merge two treaps
