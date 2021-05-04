@@ -1,21 +1,11 @@
 #include <iostream>
-using namespace std;
 #include <cstdlib>
 #include <vector>
-#include <deque>
-#include <list>
 #include <algorithm>
+using namespace std;
 
+#define DELETE_PRINT 1
 
-// template<class InputIterator, class T>
-//   InputIterator find (InputIterator first, InputIterator last, const T& val)
-// {
-//   while (first!=last) {
-//     if (*first==val) return first;
-//     ++first;
-//   }
-//   return last;
-// }
 
 template <typename key_t>
 class Treap_node_t
@@ -41,7 +31,6 @@ class Treap_node_t
     Treap_node_t(key_t key, int prior)
     : node_val(key, prior),left_n(nullptr), right_n(nullptr)
     {
-        // cout<<"HERE2\n";
 
     }
 
@@ -53,6 +42,17 @@ class Treap_node_t
         this->node_val.second = rhs.node_val.second;
         this->right_n = nullptr;
         this->left_n = nullptr;
+    }
+
+    //move constructor
+    Treap_node_t(Treap_node_t &&rhs)
+    :left_n(rhs.left_n), right_n(rhs.right_n)
+    {
+        // cout<<"HERE2\n";
+        this->node_val = std::move(rhs.node_val);
+        this->duplicate = std::move(rhs.duplicate);
+        rhs.right_n = nullptr;
+        rhs.left_n = nullptr;
     }
 
     // build constructor
@@ -67,7 +67,7 @@ class Treap_node_t
             // cout<<"F: "<<*first<<" M: "<<*mid<<"\n";
             *this = Treap_node_t(*mid, rand()%100 + 1);
             try
-            {
+            {   
                 this->left_n = new Treap_node_t(first, mid);
             }
             catch(...)
@@ -93,18 +93,14 @@ class Treap_node_t
 
     void heapify()
     {
-        if(this == nullptr)
-        {
-            return ;
-        }
         Treap_node_t *max_ = this;
         if( this->left_n != nullptr && this->left_n->node_val.second > max_->node_val.second )
         {
-            max_ = (this->left_n);
+            max_ = this->left_n;
         }
         if( this->right_n != nullptr && this->right_n->node_val.second > max_->node_val.second )
         {
-            max_ = (this->right_n);
+            max_ = this->right_n;
         }
         if(*max_ != *this)
         {
@@ -118,17 +114,75 @@ class Treap_node_t
     //copy assignment operator
     Treap_node_t& operator=(const Treap_node_t &rhs)
     {
-        this->node_val.first = rhs.node_val.first;
-        this->node_val.second = rhs.node_val.second;
-        this->right_n = nullptr;
-        this->left_n = nullptr;
+        cout<<"COPY ASSIGNMENT\n";
+        if( this!=&rhs )
+        {
+            if(this->left_n)
+            {
+                delete this->left_n;
+            }
+            if(this->right_n)
+            {
+                delete this->right_n;
+            }
+            this->node_val.first = rhs.node_val.first;
+            this->node_val.second = rhs.node_val.second;
+            this->right_n = rhs.right_n;
+            this->left_n = rhs.left_n;
+        }
         return *this;
+    }
+
+    //move assignment operator
+    Treap_node_t& operator=(Treap_node_t &&rhs)
+    {
+        if(this != &rhs)
+        {
+            if(this->left_n)
+            {
+                delete this->left_n;
+            }
+            this->left_n = rhs.left_n;
+            rhs.left_n = nullptr;
+
+            if(this->right_n)
+            {
+                delete this->right_n;
+            }
+            this->right_n = rhs.right_n;
+            rhs.right_n = nullptr;
+            this->node_val = std::move(rhs.node_val);
+            this->duplicate = std::move(rhs.duplicate);
+        }
+        return *this;
+
+
+        // if(this != &rhs)
+        // {
+        //     if(this->root != nullptr)
+        //     {
+        //         this->root->delete_treap();
+        //     }
+        //     this->root = rhs.root;
+            
+        //     #if DELETE_PRINT
+        //     cout<<"delete of treap done\n\n";
+        //     #endif
+
+        //     this->priors = std::move(rhs.priors);
+        //     this->choice = std::move(rhs.choice);
+        //     rhs.root = nullptr;            
+        // }
+
+        // return *this;
+
     }
 
     //destructor
     ~Treap_node_t()
     {
-
+        cout<<"Deleting node\n";
+        cout<<*this<<"\n";
     }
 
     //function to overload put out operator
@@ -175,6 +229,7 @@ class Treap_node_t
         {
             root->duplicate = 1;
             root->node_val.second = prior;
+            root->heapify();
         }
 
         return root;
@@ -196,10 +251,12 @@ class Treap_node_t
         {
             *merged_treap = nullptr;
         }
+
         else if(left_sub_treap_n == nullptr)
         {
             *merged_treap = right_sub_treap_n;
         }
+
         else if(right_sub_treap_n == nullptr)
         {
             *merged_treap = left_sub_treap_n;
@@ -242,8 +299,9 @@ class Treap_node_t
 
         Treap_node_t *left_temp, *right_temp, *root;
 
-        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 110);
+        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 101+rand()%100);
         right_treap->split_node(&left_temp, &right_temp);
+        
         // cout<<"Before new \n";
         root = new Treap_node_t(*left_treap);
         // cout<<"After new \n";
@@ -277,7 +335,7 @@ class Treap_node_t
 
         if(right_treap->duplicate)
         {
-            cout<<"HERE in DUP\n";
+            // cout<<"HERE in DUP\n";
             root = new Treap_node_t(*left_treap);
             root->left_n = left;
             root->right_n = right;
@@ -285,14 +343,51 @@ class Treap_node_t
         }
         else
         {
-            cout<<"HERE in NOT DUP\n";
+            // cout<<"HERE in NOT DUP\n";
             Treap_node_t *temp = nullptr;
-            // merge_node(left, right);
+            
+            left->merge_node(&(temp), left, right);
+            left = nullptr;
+            right = nullptr;
+            return temp;
+        }
+    }
 
+    Treap_node_t *diff_node(Treap_node_t *left_treap, Treap_node_t *right_treap, bool rt_subt)
+    {
+        if(left_treap == nullptr || right_treap == nullptr)
+        {
+            return rt_subt ? left_treap : right_treap;
+        }
+
+        else if(left_treap->node_val.second < right_treap->node_val.second)
+        {
+            return this->diff_node(right_treap, left_treap, !rt_subt);
+        }
+
+        Treap_node_t *left_temp, *right_temp, *root, *left, *right;
+
+        right_treap = right_treap->insert_node(right_treap, left_treap->node_val.first, 110);
+        right_treap->split_node(&left_temp, &right_temp);
+
+        left = diff_node(left_treap->left_n, left_temp, rt_subt);
+        right = diff_node(left_treap->right_n, right_temp, rt_subt);
+
+        if( !right_treap->duplicate && rt_subt )
+        {
+            root = new Treap_node_t(*left_treap);
+            root->left_n = left;
+            root->right_n = right;
+            return root;
+        }
+        else
+        {
+            Treap_node_t *temp = nullptr;
 
             left->merge_node(&(temp), left, right);
             left = nullptr;
             right = nullptr;
+
             return temp;
         }
     }
@@ -331,19 +426,26 @@ class Treap_node_t
         }
     }
 
-    //static function to delete a node from the treap
-    static void delete_treap(Treap_node_t<key_t> *root)
+    //function to delete the treap
+    void delete_treap()
     {
-        if(root)
+        if(this->left_n != nullptr)
         {
-            delete_treap(root->left_n);
-            delete_treap(root->right_n);
-            // cout << "DELETING\n" << *root << "\n";
-            delete root;
+            this->left_n->delete_treap();
         }
+        if(this->right_n != nullptr)
+        {
+            this->right_n->delete_treap();
+        }
+            
+        #if DELETE_PRINT
+            cout << "DELETING\n" << *this << "\n";
+        #endif
+
+        delete this;
     }
 
-    //static function to copy a node of the treap
+    //static function to copy the treap
     static Treap_node_t<key_t>* copy_treap(Treap_node_t<key_t>** lhs, Treap_node_t<key_t> *root)
     {
         if(root)
@@ -382,15 +484,21 @@ class Treap_node_t
     //function to search for a node in the treap
     Treap_node_t *search_node(Treap_node_t *root, key_t search_key)
     {
-        if(root == nullptr || (root -> node_val).first == search_key)
+        if(root == nullptr || root->node_val.first == search_key)
         {
             return root;
         }
-        if((root -> node_val).first < search_key)
+
+        else if(root->node_val.first < search_key)
         {
             return search_node(root -> right_n, search_key);
         }
-        return search_node(root -> left_n, search_key);
+
+        else if(root->node_val.first > search_key)
+        {
+            return search_node(root -> left_n, search_key);
+        }
+        return nullptr;
     }
 
     //function to delete a node in the treap
@@ -412,14 +520,14 @@ class Treap_node_t
             root->right_n = delete_node(root->right_n,key);
         }
 
-        else if( !root->left_n )
+        else if(root->left_n == nullptr)
         {
             Treap_node_t* temp = root->right_n;
             delete root;
             root = temp;
         }
 
-        else if( !root->right_n )
+        else if(root->right_n == nullptr)
         {
             Treap_node_t* temp = root->left_n;
             delete root;
@@ -551,6 +659,30 @@ class Treap_node_t
         return !(*this == rhs);
     }
 
+    //function to print the treap as tree structure
+    void print_2d_node(int space = 0)
+    {
+        space += 10;
+        if( this->right_n!=nullptr )
+        {
+            this->right_n->print_2d_node(space);
+        }
+
+        cout<<"\n";
+
+        for (int i = 10; i < space; i++) 
+        {
+            cout<<" "; 
+        }
+
+        cout << this->node_val.first << " " << this->node_val.second;
+
+        if( this->left_n!=nullptr )
+        {
+            this->left_n->print_2d_node(space);
+        }
+    }
+    
 };
 
 
@@ -582,7 +714,11 @@ class Treap_t
     //copy constructor
     Treap_t(const Treap_t &rhs)
     {
-        Treap_node_t<key_t>::copy_treap(&(this->root), rhs.root);
+        
+        if(rhs.root != nullptr)
+        {
+            this->root = Treap_node_t<key_t>::copy_treap(&(this->root), rhs.root);
+        }
         this->priors.resize(rhs.priors.size());
         copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
         this->choice = rhs.choice;
@@ -612,29 +748,75 @@ class Treap_t
         // this->root = (first, last);
     }
 
+
+
     //copy assignment operator
     Treap_t& operator=(const Treap_t &rhs)
     {
-        Treap_node_t<key_t>::copy_treap(&(this->root), rhs.root);
-        this->priors.resize(rhs.priors.size());
-        copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
-        this->choice = rhs.choice;
+        if(this != &rhs)
+        {
+            if(this->root != nullptr)
+            {
+                this->root->delete_treap();
+            }
+            
+            #if DELETE_PRINT
+            cout<<"delete of treap done\n\n";
+            #endif
+
+            this->root = Treap_node_t<key_t>::copy_treap(&(this->root), rhs.root);
+            this->priors.resize(rhs.priors.size());
+            std::copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
+            this->choice = rhs.choice;            
+        }
+
+        return *this;
+    }
+
+    //move constructor
+    Treap_t(Treap_t&& rhs)
+    : root(rhs.root)
+    {
+        this->choice = std::move(rhs.choice);
+        this->priors = std::move(rhs.priors);
+        rhs.root = nullptr;
+    }
+
+    //move assignment operator
+    Treap_t& operator=(Treap_t &&rhs)
+    {
+        if(this != &rhs)
+        {
+            if(this->root != nullptr)
+            {
+                this->root->delete_treap();
+            }
+            this->root = rhs.root;
+            
+            #if DELETE_PRINT
+            cout<<"delete of treap done\n\n";
+            #endif
+
+            this->priors = std::move(rhs.priors);
+            this->choice = std::move(rhs.choice);
+            rhs.root = nullptr;            
+        }
+
         return *this;
     }
 
     //destructor
     ~Treap_t()
     {
-        Treap_node_t<key_t>::delete_treap(this->root);
-        // cout<<"delete of treap done\n\n";
+        if(this->root != nullptr)
+        {
+            this->root->delete_treap();
+        }
+        #if DELETE_PRINT
+        cout<<"delete of treap done\n\n";
+        #endif
     }
 
-    // template< typename iter_t >
-    // void build(iter_t first, iter_t last)
-    // {
-    //     build_nodes(first, last)
-    // }
-    
     //function to insert a node into the treap
     void insert(key_t key)
     {
@@ -644,7 +826,7 @@ class Treap_t
             case 'r':
             {
 
-                while((find(priors.begin(),priors.end(),new_prior = rand()%100 + 1))!=priors.end())
+                while((std::find(priors.begin(),priors.end(),new_prior = rand()%100 + 1))!=priors.end())
                 {
                     break;
                 }
@@ -658,8 +840,9 @@ class Treap_t
     //function to split a treap
     void split(key_t key, Treap_t *left_sub_treap, Treap_t *right_sub_treap)
     {
-        this->root = this->root->insert_node(this->root, key, 110);
+        this->root = this->root->insert_node(this->root, key, 101+rand()%100);
         this->root->split_node(&(left_sub_treap->root),&(right_sub_treap->root));
+        
     }
 
     //function to merge two treaps
@@ -755,13 +938,37 @@ class Treap_t
         
     }
 
-    //function to search for a node in the treap
-    Treap_node_t<key_t> *search(key_t search_key)
+
+    //function to find the set difference of two treaps
+    void diff_treap(Treap_t *treap1, Treap_t *treap2)
     {
-        return this->root->search_node(this -> root, search_key);
+        if(treap1->root == nullptr && treap2->root == nullptr)
+        {
+            this->root = nullptr;
+        }
+
+        else if(treap1->root == nullptr)
+        {
+            *this = *treap2;
+        }
+
+        else if(treap2->root == nullptr)
+        {
+            *this = *treap1;
+        }
+
+        else
+        {
+            Treap_t<key_t> *temp1 = new Treap_t(), *temp2 = new Treap_t();
+            
+            *temp1 = *treap1;
+            *temp2 = *treap2;
+            this->root = temp1->root->diff_node(temp1->root, temp2->root, true);
+            
+        }
     }
 
-
+    
     //function to delete a node in the treap
     void delete_(key_t key)
     {
@@ -771,10 +978,18 @@ class Treap_t
     //function to overload the put out operator
     friend ostream& operator<<(ostream &o, const Treap_t<key_t> &rhs)
     {
-        rhs.root->inorder_traversal(rhs.root);
+        // rhs.root->inorder_traversal(rhs.root);
+        rhs.print_2d();
         //cout<<*(rhs.root);
         return o;
     }
+
+    //function to perform the preorder traversal of the treap
+    void inorder()
+    {
+        this->root->inorder_traversal(this->root);
+    }
+
 
     //function to perform the preorder traversal of the treap
     void preorder()
@@ -857,10 +1072,17 @@ class Treap_t
             {
                 // return this->ptr_it->node_val.first == rhs.ptr_it->node_val.first;
                 if( this->ptr_it!=nullptr && rhs.ptr_it!=nullptr )
+                {
                     return (*(this -> ptr_it) == *(rhs.ptr_it));
+                }
                 else if( this->ptr_it==nullptr && rhs.ptr_it==nullptr )
+                {
                     return 1;
-                else return 0;
+                }
+                else 
+                {
+                    return 0;
+                }
             }
 
             //function to overload the inequality operator
@@ -869,6 +1091,12 @@ class Treap_t
                 return !(*this == rhs);
             }
 
+            //function to find if the iterator is the end of the container
+            bool is_end()
+            {
+                return this->ptr_it == nullptr;
+            }
+            
             using difference_type = long;
             using value_type = long;
             using pointer = const long*;
@@ -889,157 +1117,144 @@ class Treap_t
         return Iterator(nullptr, this->root);
     }
 
+    //function to search for a node in the treap
+    Iterator find(Iterator first, Iterator last, key_t search_key)
+    {
+        if(first != last)
+        {
+            if( !last.is_end() )
+            {
+                auto last_orig = last;
+                auto last_temp = --last;
+                if(search_key >= *first && search_key <= *last_temp)
+                {
+                    Treap_node_t<key_t>* temp = this->root->search_node(this -> root, search_key);
+                    if(temp != nullptr)
+                    {
+                        return Iterator(temp, this->root);
+                    }
+                    else 
+                    {
+                        return last_orig;
+                    }
+                }
+                else
+                {
+                    return last_orig;
+                }
+            }
+            else
+            {
+                // auto last_temp = Iterator(this->root->iterator_end(), this->root);
+                if(search_key >= *first)
+                {
+                    Treap_node_t<key_t>* temp = this->root->search_node(this -> root, search_key);
+                    if(temp != nullptr)
+                    {
+                        return Iterator(temp, this->root);
+                    }
+                    else 
+                    {
+                        return last;
+                    }
+                }
+                else
+                {
+                    return last;
+                }
+            }
+        }
+        return last;
+    }
+
+    //function to replace a node with another node
+    void replace(Iterator first, Iterator last, key_t old_value, key_t new_value)
+    {
+        if(this->find(first, last, old_value)!=last)
+        {
+            this->delete_(old_value);
+            this->insert(new_value);
+        }
+        
+    }
+
+    void print_2d() const
+    {
+        if( this->root!=nullptr )
+        {
+            this->root->print_2d_node();
+        }
+    }
     
 };
 
-int main()
-{
-    cout<<"test\n";
-    Treap_t<int> t1;
-    // t1.insert(1,2);
-    // t1.insert(3,4);
-    // t1.insert(2,3);
+// int main()
+// {
+//     Treap_t<int> t_1;
+//     t_1.insert(19);
+//     t_1.insert(23);
+//     t_1.insert(5);
+//     t_1.insert(1);
+//     t_1.insert(90);
+//     t_1.insert(28);
+//     t_1.insert(55);
 
-    // for(int i=0; i<123127; i++)
-    // {
-    //     t1.insert(rand());
-    // }
+
+//     cout<<"Tree T_1:\n\n"<<t_1<<"\n";
+//     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
+
+
+//     Treap_t<int> t_2(move(t_1));
+
+
+//     cout<<"Tree T_2:\n\n"<<t_2<<"\n";
+//     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
+
+
+//     Treap_t<int> t_3 = move(t_2);
+    
+    
+//     cout<<"Tree T_3:\n\n"<<t_3<<"\n";
+//     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
+
+
+//     Treap_t<int> t_4;
+//     t_4 = move(t_3);
+
+
+//     cout<<"Tree T_4:\n\n"<<t_4<<"\n";
+//     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
+
+
+//     vector<int> v_1 = {9, 82, 158, 1912, 174, 242, 99, 108, 235, 911, 100, 102, 555};
+
+
+//     Treap_t<int> t_5(v_1.begin(), v_1.end());
+
+//     cout<<"Tree T_5:\n\n"<<t_5<<"\n";
+//     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
+
+//     t_5 = move(t_4);
+
+//     cout<<"Tree T_5:\n\n"<<t_5<<"\n";
+//     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
+
+//     Treap_node_t<int> n_1(62, 78);
+//     cout<<"n_1\n"<<n_1<<"\n\n";
+
+//     Treap_node_t<int> n_2(move(n_1));
+//     cout<<"n_2\n"<<n_2<<"\n\n";
+
+//     Treap_node_t<int> n_3 = move(n_2);
+//     cout<<"n_3\n"<<n_3<<"\n\n";
 
     
-    t1.insert(30);
-    t1.insert(50);
-    t1.insert(70);
-    t1.insert(20);
-    t1.insert(40);
-    t1.insert(80);
-    // Treap_t<int> t2(t1);
-    // t2.insert(100);
-    // t1.insert(90);
 
-    cout<<"t1\n";
-    cout<<t1;
-    cout<<"\n\n\n";
-    // cout<<"t2\n";
-    // cout<<t2;
-    // cout<<"\n\n\n";
+//     Treap_node_t<int> n_5(4, 5);
+//     n_5 = move(n_3);
+//     cout<<"n_5\n"<<n_5<<"\n\n";
 
-    // Treap_t<int,int>::Iterator it
-
-    // Treap_t<int,int> t3;
-    // t3 = t1;
-    // cout<<t3;
-    t1.preorder();
-
-
-    // if(t1.search(90) != nullptr) 
-    //     cout << "found\n";
-    // else 
-    //     cout << "not found\n";
-
-
-
-    // auto it_begin = t2.begin();
-    // auto it_end = t2.end();
-
-    // auto it = find(t1.begin(), t1.end(), 40);
-    // while(it_begin != it_end)
-    // {
-    //     // if(*it_begin == 40)
-    //     //     *it_begin = 17203432;
-    //     cout << *it_begin << "\n";
-    //     ++it_begin;
-    //     // cout << it_begin << "\n";
-
-    // }
-    // if(it!=t1.end())
-    // {
-    //     cout<<"FOUND" <<*it<<"\n";
-
-    //     cout<<"reverse order\n";
-    //     while(it!=t1.begin())
-    //     {
-    //         cout<<*it<<"\n";
-    //         it--;
-    //     }
-    // }
-
-    // cout << count(t1.begin(), t1.end(), 40) << "\n";
-
-    // cout << "checked iterator\n";
-    // cout<<*it<<"\n";
-
-
-    //checking copy
-    // int a[10];
-    // copy(t1.begin(),t1.end(),a);
-    // for(int i = 0;i < 7; ++i)
-    // {
-    //     cout<<a[i]<<"\t";
-    // }
-    // cout<<"\n";
-
-    //checking split
-    srand(8);
-    Treap_t<int> t1_l;
-    Treap_t<int> t1_r;
-    t1.split(45,&t1_l,&t1_r);
-    t1_l.insert(1000);
-    t1_r.insert(20);
-    t1_r.insert(30);
-    t1_l.insert(50);
-    // cout<<"after split\n\n";
-
-
-    // cout<<"t1\n"<<t1<<"\n\n\n";
-    cout<<"t1_l\n"<<t1_l<<"\n\n\n";
-    cout<<"t1_r\n"<<t1_r<<"\n\n\n";
-
-    // Treap_t<int> t2;
-    // t2.merge(&t1_l,&t1_r);
-    // cout<<"t2\n\n"<<t2;
-
-    // Treap_t<int> *t3 = nullptr;
-    // Treap_t<int> *t4 = nullptr;
-    // Treap_t<int> t5;
-    // Treap_t<int> t6;
-    // // t5.merge(t3,t4);
-    // // cout<<"t5\n\n"<<t5;
-    // t5.merge(&t5,&t6);
-    // // cout<<"t4\n\n"<<t4;
-    // cout<<"t5\n\n"<<t5;
-
-    Treap_t<int> t8;
-    Treap_t<int> t9;
-    t9.insert(130);
-    t9.insert(140);
-    t9.insert(120);
-    t9.insert(150);
-    // cout<<"test obj\n\n";
-    cout<<"t1_l\n\n"<<t1_l;
-    cout<<"t9\n\n"<<t9;
-    t8.union_treaps(&t1_l, &t1_r);
-    t8.intersect_treaps(&t1_l, &t9);
-    cout<<"t8\n\n"<<t8;
-    // t8.union_treaps(&t8, &t8);
-    // cout<<"test after union\n\n";
-    // cout<<"t8\n\n"<<t8;
-    // cout<<"t1l\n\n"<<t1_l;
-    // cout<<"t1r\n\n"<<t1_r;
-
-    // vector<int> a1 = {1, 2, 3, 5};
-    // deque<int> a2 = {4, 5, 7, 1, 2};
-    // list<int> a3 = {1, 2, 3, 5};
-    // Treap_t<int> b1(a1.begin(), a1.end());
-    // Treap_t<int> b2(a2.begin(), a2.end());
-    // Treap_t<int> b3(a3.begin(), a3.end());
-    // cout << "b1:\n" << b1 << "\n";
-    // cout << "b2:\n" << b2 << "\n";
-    // cout << "b3:\n" << b3 << "\n";
+//     // Treap_node_t<int> n_2(move(n_1));
     
 
-}
-
-
-
-
-// finish union - using copy ctor, handle duplicates
+// }

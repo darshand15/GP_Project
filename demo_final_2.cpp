@@ -4,7 +4,7 @@
 #include <algorithm>
 using namespace std;
 
-#define DELETE_PRINT 0
+#define DELETE_PRINT 1
 
 
 template <typename key_t>
@@ -42,6 +42,17 @@ class Treap_node_t
         this->node_val.second = rhs.node_val.second;
         this->right_n = nullptr;
         this->left_n = nullptr;
+    }
+
+    //move constructor
+    Treap_node_t(Treap_node_t &&rhs)
+    :left_n(rhs.left_n), right_n(rhs.right_n)
+    {
+        // cout<<"HERE2\n";
+        this->node_val = std::move(rhs.node_val);
+        this->duplicate = std::move(rhs.duplicate);
+        rhs.right_n = nullptr;
+        rhs.left_n = nullptr;
     }
 
     // build constructor
@@ -103,17 +114,75 @@ class Treap_node_t
     //copy assignment operator
     Treap_node_t& operator=(const Treap_node_t &rhs)
     {
-        this->node_val.first = rhs.node_val.first;
-        this->node_val.second = rhs.node_val.second;
-        this->right_n = nullptr;
-        this->left_n = nullptr;
+        cout<<"COPY ASSIGNMENT\n";
+        if( this!=&rhs )
+        {
+            if(this->left_n)
+            {
+                delete this->left_n;
+            }
+            if(this->right_n)
+            {
+                delete this->right_n;
+            }
+            this->node_val.first = rhs.node_val.first;
+            this->node_val.second = rhs.node_val.second;
+            this->right_n = rhs.right_n;
+            this->left_n = rhs.left_n;
+        }
         return *this;
+    }
+
+    //move assignment operator
+    Treap_node_t& operator=(Treap_node_t &&rhs)
+    {
+        if(this != &rhs)
+        {
+            if(this->left_n)
+            {
+                delete this->left_n;
+            }
+            this->left_n = rhs.left_n;
+            rhs.left_n = nullptr;
+
+            if(this->right_n)
+            {
+                delete this->right_n;
+            }
+            this->right_n = rhs.right_n;
+            rhs.right_n = nullptr;
+            this->node_val = std::move(rhs.node_val);
+            this->duplicate = std::move(rhs.duplicate);
+        }
+        return *this;
+
+
+        // if(this != &rhs)
+        // {
+        //     if(this->root != nullptr)
+        //     {
+        //         this->root->delete_treap();
+        //     }
+        //     this->root = rhs.root;
+            
+        //     #if DELETE_PRINT
+        //     cout<<"delete of treap done\n\n";
+        //     #endif
+
+        //     this->priors = std::move(rhs.priors);
+        //     this->choice = std::move(rhs.choice);
+        //     rhs.root = nullptr;            
+        // }
+
+        // return *this;
+
     }
 
     //destructor
     ~Treap_node_t()
     {
-
+        cout<<"Deleting node\n";
+        cout<<*this<<"\n";
     }
 
     //function to overload put out operator
@@ -369,7 +438,7 @@ class Treap_node_t
             this->right_n->delete_treap();
         }
             
-        #if DELETE_PRINT
+        #if 0
             cout << "DELETING\n" << *this << "\n";
         #endif
 
@@ -679,6 +748,8 @@ class Treap_t
         // this->root = (first, last);
     }
 
+
+
     //copy assignment operator
     Treap_t& operator=(const Treap_t &rhs)
     {
@@ -697,6 +768,38 @@ class Treap_t
             this->priors.resize(rhs.priors.size());
             std::copy(rhs.priors.begin(),rhs.priors.end(),this->priors.begin());
             this->choice = rhs.choice;            
+        }
+
+        return *this;
+    }
+
+    //move constructor
+    Treap_t(Treap_t&& rhs)
+    : root(rhs.root)
+    {
+        this->choice = std::move(rhs.choice);
+        this->priors = std::move(rhs.priors);
+        rhs.root = nullptr;
+    }
+
+    //move assignment operator
+    Treap_t& operator=(Treap_t &&rhs)
+    {
+        if(this != &rhs)
+        {
+            if(this->root != nullptr)
+            {
+                this->root->delete_treap();
+            }
+            this->root = rhs.root;
+            
+            #if DELETE_PRINT
+            cout<<"delete of treap done\n\n";
+            #endif
+
+            this->priors = std::move(rhs.priors);
+            this->choice = std::move(rhs.choice);
+            rhs.root = nullptr;            
         }
 
         return *this;
@@ -1084,4 +1187,3 @@ class Treap_t
     }
     
 };
-
