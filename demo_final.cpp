@@ -458,14 +458,14 @@ class Treap_node_t
             root->right_n = delete_node(root->right_n,key);
         }
 
-        else if( !root->left_n )
+        else if(root->left_n != nullptr)
         {
             Treap_node_t* temp = root->right_n;
             delete root;
             root = temp;
         }
 
-        else if( !root->right_n )
+        else if(root->right_n != nullptr)
         {
             Treap_node_t* temp = root->left_n;
             delete root;
