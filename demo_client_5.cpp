@@ -1,4 +1,4 @@
-#include "demo_final.cpp"
+#include "demo_final_2.cpp"
 #include <iostream>
 #include <string>
 
@@ -19,7 +19,7 @@ int main()
     // Traversals
     // Search
     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
-
+    srand(16);
     Treap_t<int> t_1;
     t_1.insert(19);
     t_1.insert(23);
@@ -66,6 +66,9 @@ int main()
     cout<<"Tree T_1:\n\n"<<t_1<<"\n";
     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
 
+    cout<<"Tree T_3:\n\n"<<t_3<<"\n";
+    cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
+    
     cout<<"Generic Find\n\n";
 
     Treap_t<int>::Iterator it_1 = find(t_1.begin(), t_1.end(), 23);
@@ -127,7 +130,7 @@ int main()
     t_3.replace(t_3.begin(), t_3.end(), "D", "F");
     t_3.replace(t_3.begin(), t_3.end(), "Y", "K");
 
-    cout<<"T_3 after replacing B with H and D with F and trying to replace a non existent key Y with K" << t_3 << "\n\n";
+    cout<<"T_3 after replacing B with H and D with F and trying to replace a non existent key Y with K\n" << t_3 << "\n\n";
 
     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
 
@@ -135,11 +138,11 @@ int main()
 
     int c_1 = count(t_1.begin(), t_1.end(), 5);
 
-    cout<<"Count of key " << 5 << " : " << c_1 << "\n\n";
+    cout<<"Count of key " << 5 << " in T_1: " << c_1 << "\n\n";
 
     int c_2 = count_if(t_1.begin(), t_1.end(), IsOdd);
 
-    cout<<"Count of Odd keys" << " : " << c_2 << "\n\n";
+    cout<<"Count of Odd keys" << " in T_1 : " << c_2 << "\n\n";
 
     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
 }
