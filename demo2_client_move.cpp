@@ -1,5 +1,4 @@
 #include "demo_final_2.cpp"
-// #include "test2_m.cpp"
 #include <iostream>
 #include <string>
 
@@ -7,6 +6,7 @@ using namespace std;
 
 int main()
 {
+    srand(9);
     Treap_t<int> t_1;
     t_1.insert(19);
     t_1.insert(23);
@@ -22,6 +22,10 @@ int main()
 
 
     Treap_t<int> t_2(move(t_1));
+
+
+    cout<<"Tree T_1:\n\n"<<t_1<<"\n";
+    cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
 
 
     cout<<"Tree T_2:\n\n"<<t_2<<"\n";
@@ -56,20 +60,20 @@ int main()
     cout<<"Tree T_5:\n\n"<<t_5<<"\n";
     cout<<"\n--------------------------------------------------------------------------------------------------------------------------------\n\n";
 
-    Treap_node_t<int> n_1(62, 78);
-    cout<<"n_1\n"<<n_1<<"\n\n";
+    // Treap_node_t<int> n_1(62, 78);
+    // cout<<"n_1\n"<<n_1<<"\n\n";
 
-    Treap_node_t<int> n_2(move(n_1));
-    cout<<"n_2\n"<<n_2<<"\n\n";
+    // Treap_node_t<int> n_2(move(n_1));
+    // cout<<"n_2\n"<<n_2<<"\n\n";
 
-    Treap_node_t<int> n_3 = move(n_2);
-    cout<<"n_3\n"<<n_3<<"\n\n";
+    // Treap_node_t<int> n_3 = move(n_2);
+    // cout<<"n_3\n"<<n_3<<"\n\n";
 
     
 
-    Treap_node_t<int> n_5(4, 5);
-    n_5 = move(n_3);
-    cout<<"n_5\n"<<n_5<<"\n\n";
+    // Treap_node_t<int> n_5(4, 5);
+    // n_5 = move(n_3);
+    // cout<<"n_5\n"<<n_5<<"\n\n";
 
     // Treap_node_t<int> n_2(move(n_1));
     
