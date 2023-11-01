@@ -67,15 +67,13 @@ A project aimed at implementing Treap as a generic data structure along with the
 * This header file (**treap.h**) has been placed inside the **Source_Code** folder of this repository
 * The way to include it is as follows: ```#include “treap.h”```
 * Once this is included, clients can create treaps and call functions to perform different operations as explained above using the provided interfaces
-* The client file is then compiled using the g++ utility:
-```g++ client.cpp -o exec```
+* The client file is then compiled using the g++ utility as follows: ```g++ client.cpp -o exec```
 * The **Source_Code** folder of this repository contains multiple client files that check for different implemented functionalities of the treap
   * **client1.cpp** - Checks for insertion and deletion of nodes and copying treaps
   * **client2.cpp** - Checks for split and merge operations on the treaps
   * **client3.cpp** - Checks for Union, Intersection, and Difference set operations
   * **client4.cpp** - Testing of Iterators on member and generic algorithms
   * **client5.cpp** - Checks for move constructor and move assignment operator
-* The generated executable is then loaded and executed as follows:
-```./exec```
+* The generated executable is then loaded and executed as follows: ```./exec```
 
 
