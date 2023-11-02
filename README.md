@@ -7,7 +7,7 @@
 * Karan Kumar G
 * Mayur Peshve
 
-### Abstract
+### Summary
 
 A project aimed at implementing Treap as a generic data structure along with the different functionalities of a treap. Treap is a data structure that stores pairs (say [X,Y]) in a binary tree such that it is a binary search tree by X and a binary heap by Y. In such an implementation, the X values are the keys while the Y values are the priorities that specify how the tree is constructed. In this project, the priorities are randomized, thereby using Randomization and the Binary Heap property (specifically, the max heap property in our implementation) to construct a randomized balanced binary search tree that maintains balance with high probability. The entire treap and its individual nodes were built as generic canonical classes, thereby supporting all the different data types. The project involved the implementation of multiple operations such as insert node, delete node, split treap, merge two treaps, union, intersection, difference, and traversal of treaps. A bidirectional iterator was implemented as a nested class within the treap class. Multiple member algorithms such as find and replace were implemented for treaps. This project was developed and implemented as part of the Generic Programming Course during our Undergraduate Study.
 
