@@ -1,7 +1,7 @@
 # Generic Programming Project
 ## Implementation of Treaps
 
-### Team Members:
+### Team Members
 
 * Darshan D
 * Karan Kumar G
